@@ -1,0 +1,90 @@
+# =============================================================================
+# .dockerignore - Arquivos a serem ignorados no build Docker
+# =============================================================================
+
+# Ambiente virtual Python
+venv/
+.venv/
+env/
+ENV/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Arquivos de ambiente (NÃO incluir secrets no container!)
+.env
+.env.*
+*.env
+.env.local
+.env.development
+.env.production
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# Arquivos temporários e logs
+*.tmp
+*.temp
+*.log
+*.logs
+logs/
+
+# Testes
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Documentação web local (não necessária no deploy)
+docs-web/
+
+# Arquivos grandes de dados CSV (exceto os necessários)
+*.csv
+
+# Arquivos de build
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# MyPy
+.mypy_cache/
+
+# Ruff / Linters
+.ruff_cache/
+
+# Fly.io local
+fly.toml.bak
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Documentação (se não for necessária no runtime)
+# docs/   # Descomente se quiser excluir a pasta docs
+

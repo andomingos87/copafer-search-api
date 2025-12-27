@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Products API - Documentação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Search API</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <span></span>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3 class="nav-title">Início</h3>
+                <ul class="nav-list">
+                    <li><a href="#overview" class="nav-link active" data-section="overview">
+                        <span class="nav-icon">📚</span>Visão Geral
+                    </a></li>
+                    <li><a href="#endpoints" class="nav-link" data-section="endpoints">
+                        <span class="nav-icon">🔌</span>Endpoints da API
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3 class="nav-title">Arquivos Principais</h3>
+                <ul class="nav-list">
+                    <li><a href="#api" class="nav-link" data-section="api">
+                        <span class="nav-icon">🚀</span>api.py
+                    </a></li>
+                    <li><a href="#search" class="nav-link" data-section="search">
+                        <span class="nav-icon">🔍</span>search_products.py
+                    </a></li>
+                    <li><a href="#ingest-csv" class="nav-link" data-section="ingest-csv">
+                        <span class="nav-icon">📥</span>ingest_csv.py
+                    </a></li>
+                    <li><a href="#ingest-api" class="nav-link" data-section="ingest-api">
+                        <span class="nav-icon">🌐</span>ingest_api.py
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3 class="nav-title">Módulos de Negócio</h3>
+                <ul class="nav-list">
+                    <li><a href="#paint" class="nav-link" data-section="paint">
+                        <span class="nav-icon">🎨</span>paint_estimator.py
+                    </a></li>
+                    <li><a href="#vtex-shipping" class="nav-link" data-section="vtex-shipping">
+                        <span class="nav-icon">🚚</span>vtex_shipping.py
+                    </a></li>
+                    <li><a href="#vtex-client" class="nav-link" data-section="vtex-client">
+                        <span class="nav-icon">🔗</span>vtex_client.py
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3 class="nav-title">Utilitários</h3>
+                <ul class="nav-list">
+                    <li><a href="#fetch-cubo" class="nav-link" data-section="fetch-cubo">
+                        <span class="nav-icon">📊</span>fetch_cubo_produtos.py
+                    </a></li>
+                    <li><a href="#head-csv" class="nav-link" data-section="head-csv">
+                        <span class="nav-icon">✂️</span>head_csv.py
+                    </a></li>
+                    <li><a href="#count-csv" class="nav-link" data-section="count-csv">
+                        <span class="nav-icon">🔢</span>count_csv_rows.py
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3 class="nav-title">Debug & Testes</h3>
+                <ul class="nav-list">
+                    <li><a href="#debug" class="nav-link" data-section="debug">
+                        <span class="nav-icon">🔧</span>Scripts de Debug
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3 class="nav-title">Configuração</h3>
+                <ul class="nav-list">
+                    <li><a href="#requirements" class="nav-link" data-section="requirements">
+                        <span class="nav-icon">📦</span>requirements.txt
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3 class="nav-title">Deploy</h3>
+                <ul class="nav-list">
+                    <li><a href="#deploy-flyio" class="nav-link" data-section="deploy-flyio">
+                        <span class="nav-icon">🚀</span>Deploy na Fly.io
+                    </a></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <header class="page-header">
+            <button class="menu-btn" id="menuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="header-info">
+                <span class="version-badge">v1.0</span>
+                <span class="header-divider">|</span>
+                <span class="header-text">Documentação Técnica</span>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <!-- Overview Section -->
+            <section id="overview" class="doc-section active">
+                <div class="section-header">
+                    <h1>Search Products API</h1>
+                    <p class="section-subtitle">Sistema de busca inteligente de produtos</p>
+                </div>
+
+                <div class="card highlight-card">
+                    <h2>📚 Visão Geral</h2>
+                    <p>Este projeto é uma <strong>API de busca de produtos</strong> construída com FastAPI. Ela permite realizar buscas inteligentes em um catálogo de produtos usando múltiplas estratégias.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🔍</span>
+                        <h3>Busca Híbrida</h3>
+                        <p>Combina busca vetorial (embeddings OpenAI), full-text, trigram e keyword</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🎨</span>
+                        <h3>Estimador de Tinta</h3>
+                        <p>Calcula quantidade de latas necessárias para pintura</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🚚</span>
+                        <h3>Integração VTEX</h3>
+                        <p>Simulação de frete e consulta de SKUs</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">📥</span>
+                        <h3>Ingestão de Dados</h3>
+                        <p>Importação via CSV ou API externa (Cubo)</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🏗️ Arquitetura do Sistema</h2>
+                    <div class="architecture-diagram">
+                        <pre>
+┌─────────────────────────────────────────────────────────────┐
+│                    <span class="hl-blue">FastAPI (api.py)</span>                        │
+├─────────────────────────────────────────────────────────────┤
+│  POST /search          │ Busca híbrida de produtos          │
+│  POST /paint/estimate  │ Cálculo de tinta                   │
+│  GET  /vtex/sku/{sku}  │ Consulta SKU na VTEX               │
+│  POST /shipping/*      │ Simulação de frete                 │
+└────────────┬──────────────────────────────┬─────────────────┘
+             │                              │
+    ┌────────▼────────┐          ┌─────────▼─────────┐
+    │<span class="hl-green">search_products.py</span>│          │ <span class="hl-purple">paint_estimator.py</span>│
+    │                 │          │                   │
+    │ - Busca vetorial │          │ - Cálculo área    │
+    │ - Full-text     │          │ - Composição latas│
+    │ - Trigram       │          └───────────────────┘
+    │ - Keyword       │
+    └────────┬────────┘
+             │
+    ┌────────▼────────┐
+    │   <span class="hl-orange">PostgreSQL</span>    │
+    │  (pgvector/rag) │
+    └────────┬────────┘
+             │
+    ┌────────▼────────┐
+    │  <span class="hl-cyan">Ingestão CSV</span>   │ ◄── ingest_csv.py
+    │  <span class="hl-cyan">Ingestão API</span>   │ ◄── ingest_api.py
+    └─────────────────┘</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚡ Como Iniciar</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># 1. Instalar dependências</span>
+pip install -r requirements.txt
+
+<span class="comment"># 2. Configurar .env</span>
+cp .env.example .env
+<span class="comment"># Editar com suas credenciais</span>
+
+<span class="comment"># 3. Iniciar a API</span>
+uvicorn api:app --host 0.0.0.0 --port 8000</code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔐 Variáveis de Ambiente</h2>
+                    <div class="env-table">
+                        <div class="env-group">
+                            <h4>Banco de Dados</h4>
+                            <div class="env-item"><code>DB_HOST</code><span>Host do PostgreSQL</span></div>
+                            <div class="env-item"><code>DB_PORT</code><span>Porta (padrão: 5432)</span></div>
+                            <div class="env-item"><code>DB_USER</code><span>Usuário</span></div>
+                            <div class="env-item"><code>DB_PASSWORD</code><span>Senha</span></div>
+                            <div class="env-item"><code>DB_NAME</code><span>Nome do banco</span></div>
+                        </div>
+                        <div class="env-group">
+                            <h4>OpenAI</h4>
+                            <div class="env-item"><code>OPENAI_API_KEY</code><span>Chave de API</span></div>
+                            <div class="env-item"><code>EMB_MODEL</code><span>Modelo de embedding</span></div>
+                            <div class="env-item"><code>EMB_DIM</code><span>Dimensão (padrão: 1536)</span></div>
+                        </div>
+                        <div class="env-group">
+                            <h4>VTEX</h4>
+                            <div class="env-item"><code>VTEX_APP_KEY</code><span>Chave da aplicação</span></div>
+                            <div class="env-item"><code>VTEX_APP_TOKEN</code><span>Token da aplicação</span></div>
+                            <div class="env-item"><code>VTEX_ACCOUNT_HOST</code><span>Host da conta</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Endpoints Section -->
+            <section id="endpoints" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">API Reference</span>
+                    <h1>Endpoints da API</h1>
+                    <p class="section-subtitle">Documentação completa de todos os endpoints disponíveis</p>
+                </div>
+
+                <div class="card highlight-card">
+                    <h2>🔌 Base URL</h2>
+                    <p>Todos os endpoints estão disponíveis a partir da URL base da API:</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">url</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Local</span>
+http://localhost:8000
+
+<span class="comment"># Produção (Fly.io)</span>
+https://search-products-api.fly.dev</code></pre>
+                    </div>
+                    <p class="info-text">📖 Documentação interativa (Swagger): <code>/docs</code></p>
+                    <p class="info-text">📄 OpenAPI Schema: <code>/openapi.json</code></p>
+                </div>
+
+                <!-- POST /search -->
+                <div class="card" id="endpoint-search">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <code>/search</code>
+                    </div>
+                    <h2>Busca de Produtos</h2>
+                    <p>Realiza busca híbrida no catálogo de produtos usando múltiplas estratégias: vetorial (embeddings), full-text, trigram e keyword.</p>
+                    
+                    <div class="endpoint-details">
+                        <h4>📥 Request Body</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Obrigatório</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>query</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>Termo de busca (nome, SKU, código de barras)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="endpoint-io">
+                            <div class="io-block">
+                                <h5>Exemplo de Request</h5>
+                                <pre><code>{
+  "query": "cimento 50kg"
+}</code></pre>
+                            </div>
+                            <div class="io-block">
+                                <h5>Exemplo de Response</h5>
+                                <pre><code>{
+  "method": "hybrid",
+  "confidence": 0.85,
+  "results": [
+    {
+      "sku": "12345",
+      "name": "Cimento CP-II 50kg",
+      "codigo_barras": "7891234567890",
+      "score": 0.85
+    }
+  ]
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <h4>📤 Response Fields</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>method</code></td>
+                                    <td>string</td>
+                                    <td>Método de busca utilizado (hybrid, deterministic, etc.)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>confidence</code></td>
+                                    <td>float</td>
+                                    <td>Nível de confiança da busca (0.0 a 1.0)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>results</code></td>
+                                    <td>array</td>
+                                    <td>Lista de produtos encontrados</td>
+                                </tr>
+                                <tr>
+                                    <td><code>results[].sku</code></td>
+                                    <td>string</td>
+                                    <td>Código SKU do produto</td>
+                                </tr>
+                                <tr>
+                                    <td><code>results[].name</code></td>
+                                    <td>string</td>
+                                    <td>Nome do produto</td>
+                                </tr>
+                                <tr>
+                                    <td><code>results[].score</code></td>
+                                    <td>float</td>
+                                    <td>Score de relevância do resultado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="curl-tabs">
+                        <div class="curl-tab-buttons">
+                            <button class="curl-tab-btn active" onclick="switchCurlTab(this, 'local')">🖥️ Local</button>
+                            <button class="curl-tab-btn" onclick="switchCurlTab(this, 'prod')">🚀 Produção</button>
+                        </div>
+                        <div class="curl-tab-content active" data-env="local">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "http://localhost:8000/search" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "cimento 50kg"}'</code></pre>
+                            </div>
+                        </div>
+                        <div class="curl-tab-content" data-env="prod">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "https://search-products-api.fly.dev/search" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "cimento 50kg"}'</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POST /paint/estimate -->
+                <div class="card" id="endpoint-paint">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <code>/paint/estimate</code>
+                    </div>
+                    <h2>Estimador de Tinta</h2>
+                    <p>Calcula a quantidade de tinta necessária para pintar uma área e determina a melhor combinação de latas para comprar.</p>
+                    
+                    <div class="endpoint-details">
+                        <h4>📥 Request Body</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Obrigatório</th>
+                                    <th>Padrão</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>total_area_m2</code></td>
+                                    <td>float</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>Área total a ser pintada em m²</td>
+                                </tr>
+                                <tr>
+                                    <td><code>coverage_m2_per_liter</code></td>
+                                    <td>float</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>Rendimento da tinta (m² por litro por demão)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>coats</code></td>
+                                    <td>int</td>
+                                    <td><span class="badge optional">○</span></td>
+                                    <td>1</td>
+                                    <td>Número de demãos</td>
+                                </tr>
+                                <tr>
+                                    <td><code>exclude_area_m2</code></td>
+                                    <td>float</td>
+                                    <td><span class="badge optional">○</span></td>
+                                    <td>0.0</td>
+                                    <td>Área de portas/janelas a descontar</td>
+                                </tr>
+                                <tr>
+                                    <td><code>can_sizes_liters</code></td>
+                                    <td>array[float]</td>
+                                    <td><span class="badge optional">○</span></td>
+                                    <td>[18.0, 3.6, 2.5, 0.9, 0.5]</td>
+                                    <td>Tamanhos de latas disponíveis (litros)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="endpoint-io">
+                            <div class="io-block">
+                                <h5>Exemplo de Request</h5>
+                                <pre><code>{
+  "total_area_m2": 100,
+  "coverage_m2_per_liter": 10,
+  "coats": 2,
+  "exclude_area_m2": 5,
+  "can_sizes_liters": [18.0, 3.6, 0.9]
+}</code></pre>
+                            </div>
+                            <div class="io-block">
+                                <h5>Exemplo de Response</h5>
+                                <pre><code>{
+  "paintable_area_m2": 95,
+  "liters_needed": 19,
+  "cans": {"18.0": 1, "3.6": 1},
+  "total_cans": 2,
+  "waste_liters": 2.6
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <h4>📤 Response Fields</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>paintable_area_m2</code></td>
+                                    <td>float</td>
+                                    <td>Área efetiva a ser pintada (após descontos)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>liters_needed</code></td>
+                                    <td>float</td>
+                                    <td>Quantidade de litros necessários</td>
+                                </tr>
+                                <tr>
+                                    <td><code>cans</code></td>
+                                    <td>object</td>
+                                    <td>Composição de latas (tamanho: quantidade)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>total_cans</code></td>
+                                    <td>int</td>
+                                    <td>Número total de latas</td>
+                                </tr>
+                                <tr>
+                                    <td><code>waste_liters</code></td>
+                                    <td>float</td>
+                                    <td>Litros de sobra/desperdício</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="curl-tabs">
+                        <div class="curl-tab-buttons">
+                            <button class="curl-tab-btn active" onclick="switchCurlTab(this, 'local')">🖥️ Local</button>
+                            <button class="curl-tab-btn" onclick="switchCurlTab(this, 'prod')">🚀 Produção</button>
+                        </div>
+                        <div class="curl-tab-content active" data-env="local">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "http://localhost:8000/paint/estimate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "total_area_m2": 100,
+    "coverage_m2_per_liter": 10,
+    "coats": 2,
+    "exclude_area_m2": 5
+  }'</code></pre>
+                            </div>
+                        </div>
+                        <div class="curl-tab-content" data-env="prod">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "https://search-products-api.fly.dev/paint/estimate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "total_area_m2": 100,
+    "coverage_m2_per_liter": 10,
+    "coats": 2,
+    "exclude_area_m2": 5
+  }'</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GET /vtex/sku/{sku}/productId -->
+                <div class="card" id="endpoint-vtex-sku">
+                    <div class="endpoint-header">
+                        <span class="method get">GET</span>
+                        <code>/vtex/sku/{sku}/productId</code>
+                    </div>
+                    <h2>Consulta ProductId VTEX</h2>
+                    <p>Obtém o <code>ProductId</code> da plataforma VTEX a partir de um SKU (RefId). Útil para integrações com o e-commerce.</p>
+                    
+                    <div class="endpoint-details">
+                        <h4>📥 Path Parameters</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Parâmetro</th>
+                                    <th>Tipo</th>
+                                    <th>Obrigatório</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>sku</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>Código SKU do produto</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="endpoint-io">
+                            <div class="io-block">
+                                <h5>Request</h5>
+                                <pre><code>GET /vtex/sku/33375/productId</code></pre>
+                            </div>
+                            <div class="io-block">
+                                <h5>Response (Encontrado)</h5>
+                                <pre><code>{
+  "sku": "33375",
+  "found": true,
+  "productId": 12345
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <h4>📤 Response Fields</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>sku</code></td>
+                                    <td>string</td>
+                                    <td>SKU consultado</td>
+                                </tr>
+                                <tr>
+                                    <td><code>found</code></td>
+                                    <td>boolean</td>
+                                    <td>Se o SKU foi encontrado na VTEX</td>
+                                </tr>
+                                <tr>
+                                    <td><code>productId</code></td>
+                                    <td>int | null</td>
+                                    <td>ID do produto na VTEX (apenas se found=true)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="curl-tabs">
+                        <div class="curl-tab-buttons">
+                            <button class="curl-tab-btn active" onclick="switchCurlTab(this, 'local')">🖥️ Local</button>
+                            <button class="curl-tab-btn" onclick="switchCurlTab(this, 'prod')">🚀 Produção</button>
+                        </div>
+                        <div class="curl-tab-content active" data-env="local">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X GET "http://localhost:8000/vtex/sku/33375/productId"</code></pre>
+                            </div>
+                        </div>
+                        <div class="curl-tab-content" data-env="prod">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X GET "https://search-products-api.fly.dev/vtex/sku/33375/productId"</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POST /shipping/simulate -->
+                <div class="card" id="endpoint-shipping">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <code>/shipping/simulate</code>
+                    </div>
+                    <h2>Simulação de Frete</h2>
+                    <p>Simula opções de frete na VTEX para uma lista de SKUs. Converte automaticamente SKUs em ProductIds e retorna todas as opções de entrega disponíveis.</p>
+                    
+                    <div class="endpoint-details">
+                        <h4>📥 Request Body</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Obrigatório</th>
+                                    <th>Padrão</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>items</code></td>
+                                    <td>array</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>Lista de itens para simular</td>
+                                </tr>
+                                <tr>
+                                    <td><code>items[].sku</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>Código SKU do produto</td>
+                                </tr>
+                                <tr>
+                                    <td><code>items[].quantity</code></td>
+                                    <td>int</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>Quantidade do item</td>
+                                </tr>
+                                <tr>
+                                    <td><code>items[].seller</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge optional">○</span></td>
+                                    <td>"1"</td>
+                                    <td>ID do seller</td>
+                                </tr>
+                                <tr>
+                                    <td><code>postalCode</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>CEP de destino (apenas números)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>country</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge optional">○</span></td>
+                                    <td>"BRA"</td>
+                                    <td>Código do país (ISO 3166-1 alpha-3)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>sc</code></td>
+                                    <td>string</td>
+                                    <td><span class="badge optional">○</span></td>
+                                    <td>"1"</td>
+                                    <td>Sales Channel (canal de vendas)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="endpoint-io">
+                            <div class="io-block">
+                                <h5>Exemplo de Request</h5>
+                                <pre><code>{
+  "items": [
+    {"sku": "33375", "quantity": 2},
+    {"sku": "12345", "quantity": 1}
+  ],
+  "postalCode": "01310100",
+  "country": "BRA"
+}</code></pre>
+                            </div>
+                            <div class="io-block">
+                                <h5>Exemplo de Response</h5>
+                                <pre><code>{
+  "ok": true,
+  "notFoundSkus": [],
+  "request": {...},
+  "logisticsInfo": [...],
+  "slas": [
+    {
+      "itemIndex": 0,
+      "slas": [
+        {"id": "Normal", "price": 1500},
+        {"id": "Expresso", "price": 2500}
+      ]
+    }
+  ]
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <h4>📤 Response Fields</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>ok</code></td>
+                                    <td>boolean</td>
+                                    <td>Se a simulação foi bem sucedida</td>
+                                </tr>
+                                <tr>
+                                    <td><code>notFoundSkus</code></td>
+                                    <td>array[string]</td>
+                                    <td>SKUs que não foram encontrados na VTEX</td>
+                                </tr>
+                                <tr>
+                                    <td><code>request</code></td>
+                                    <td>object</td>
+                                    <td>Payload enviado para a VTEX</td>
+                                </tr>
+                                <tr>
+                                    <td><code>logisticsInfo</code></td>
+                                    <td>array</td>
+                                    <td>Informações completas de logística (raw VTEX)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>slas</code></td>
+                                    <td>array</td>
+                                    <td>SLAs simplificados por item</td>
+                                </tr>
+                                <tr>
+                                    <td><code>message</code></td>
+                                    <td>string</td>
+                                    <td>Mensagem de erro (apenas se ok=false)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="curl-tabs">
+                        <div class="curl-tab-buttons">
+                            <button class="curl-tab-btn active" onclick="switchCurlTab(this, 'local')">🖥️ Local</button>
+                            <button class="curl-tab-btn" onclick="switchCurlTab(this, 'prod')">🚀 Produção</button>
+                        </div>
+                        <div class="curl-tab-content active" data-env="local">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "http://localhost:8000/shipping/simulate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [{"sku": "33375", "quantity": 2}],
+    "postalCode": "01310100",
+    "country": "BRA"
+  }'</code></pre>
+                            </div>
+                        </div>
+                        <div class="curl-tab-content" data-env="prod">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "https://search-products-api.fly.dev/shipping/simulate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [{"sku": "33375", "quantity": 2}],
+    "postalCode": "01310100",
+    "country": "BRA"
+  }'</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POST /shipping/simulate/slas -->
+                <div class="card" id="endpoint-shipping-slas">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <code>/shipping/simulate/slas</code>
+                    </div>
+                    <h2>Simulação de Frete (Simplificada)</h2>
+                    <p>Versão simplificada da simulação de frete que retorna apenas uma lista flat de SLAs com <code>id</code> e <code>price</code>. Ideal para integrações que precisam apenas das opções de frete disponíveis.</p>
+                    
+                    <div class="endpoint-details">
+                        <h4>📥 Request Body</h4>
+                        <p class="info-text">Mesmos parâmetros de <code>/shipping/simulate</code></p>
+
+                        <div class="endpoint-io">
+                            <div class="io-block">
+                                <h5>Exemplo de Request</h5>
+                                <pre><code>{
+  "items": [
+    {"sku": "33375", "quantity": 2}
+  ],
+  "postalCode": "01310100",
+  "country": "BRA"
+}</code></pre>
+                            </div>
+                            <div class="io-block">
+                                <h5>Exemplo de Response</h5>
+                                <pre><code>[
+  {"id": "Normal", "price": 1500},
+  {"id": "Expresso", "price": 2500},
+  {"id": "Agendada", "price": 1200}
+]</code></pre>
+                            </div>
+                        </div>
+
+                        <h4>📤 Response</h4>
+                        <p>Array de objetos com <code>id</code> (nome do SLA) e <code>price</code> (preço em centavos).</p>
+                        
+                        <div class="formula-box">
+                            <p><strong>Nota:</strong> O campo <code>price</code> é retornado em <strong>centavos</strong>.</p>
+                            <p>Exemplo: <code>1500</code> = R$ 15,00</p>
+                        </div>
+                    </div>
+
+                    <div class="curl-tabs">
+                        <div class="curl-tab-buttons">
+                            <button class="curl-tab-btn active" onclick="switchCurlTab(this, 'local')">🖥️ Local</button>
+                            <button class="curl-tab-btn" onclick="switchCurlTab(this, 'prod')">🚀 Produção</button>
+                        </div>
+                        <div class="curl-tab-content active" data-env="local">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "http://localhost:8000/shipping/simulate/slas" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [{"sku": "33375", "quantity": 2}],
+    "postalCode": "01310100"
+  }'</code></pre>
+                            </div>
+                        </div>
+                        <div class="curl-tab-content" data-env="prod">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "https://search-products-api.fly.dev/shipping/simulate/slas" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [{"sku": "33375", "quantity": 2}],
+    "postalCode": "01310100"
+  }'</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Reference -->
+                <div class="card">
+                    <h2>📋 Referência Rápida</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Método</th>
+                                <th>Endpoint</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="method post small">POST</span></td>
+                                <td><code>/search</code></td>
+                                <td>Busca híbrida de produtos</td>
+                            </tr>
+                            <tr>
+                                <td><span class="method post small">POST</span></td>
+                                <td><code>/paint/estimate</code></td>
+                                <td>Cálculo de quantidade de tinta</td>
+                            </tr>
+                            <tr>
+                                <td><span class="method get small">GET</span></td>
+                                <td><code>/vtex/sku/{sku}/productId</code></td>
+                                <td>Consulta ProductId na VTEX</td>
+                            </tr>
+                            <tr>
+                                <td><span class="method post small">POST</span></td>
+                                <td><code>/shipping/simulate</code></td>
+                                <td>Simulação completa de frete</td>
+                            </tr>
+                            <tr>
+                                <td><span class="method post small">POST</span></td>
+                                <td><code>/shipping/simulate/slas</code></td>
+                                <td>Simulação de frete (apenas SLAs)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Error Handling -->
+                <div class="card">
+                    <h2>⚠️ Tratamento de Erros</h2>
+                    <p>A API retorna erros no formato padrão do FastAPI:</p>
+                    
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">json</span>
+                        </div>
+                        <pre><code>{
+  "detail": "Mensagem de erro descritiva"
+}</code></pre>
+                    </div>
+
+                    <h4>Códigos HTTP Comuns</h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Status</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>200</code></td>
+                                <td><span class="badge success">OK</span></td>
+                                <td>Requisição bem sucedida</td>
+                            </tr>
+                            <tr>
+                                <td><code>400</code></td>
+                                <td><span class="badge warning">Bad Request</span></td>
+                                <td>Parâmetros inválidos ou faltando</td>
+                            </tr>
+                            <tr>
+                                <td><code>404</code></td>
+                                <td><span class="badge warning">Not Found</span></td>
+                                <td>Recurso não encontrado</td>
+                            </tr>
+                            <tr>
+                                <td><code>422</code></td>
+                                <td><span class="badge warning">Validation Error</span></td>
+                                <td>Erro de validação dos dados</td>
+                            </tr>
+                            <tr>
+                                <td><code>500</code></td>
+                                <td><span class="badge error">Server Error</span></td>
+                                <td>Erro interno do servidor</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- API Section -->
+            <section id="api" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">api.py</span>
+                    <h1>Servidor FastAPI</h1>
+                    <p class="section-subtitle">Arquivo principal da aplicação com todos os endpoints</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Este é o <strong>arquivo principal</strong> da aplicação. Ele cria o servidor FastAPI e define todos os endpoints disponíveis para uso externo.</p>
+                </div>
+
+                <div class="endpoints-list">
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <code>/search</code>
+                        </div>
+                        <p>Busca produtos no catálogo</p>
+                        <div class="endpoint-details">
+                            <div class="endpoint-io">
+                                <div class="io-block">
+                                    <h5>Entrada</h5>
+                                    <pre><code>{
+  "query": "cimento 50kg"
+}</code></pre>
+                                </div>
+                                <div class="io-block">
+                                    <h5>Saída</h5>
+                                    <pre><code>{
+  "method": "hybrid",
+  "confidence": 0.85,
+  "results": [
+    {
+      "sku": "12345",
+      "name": "Cimento CP-II 50kg",
+      "score": 0.85
+    }
+  ]
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <code>/paint/estimate</code>
+                        </div>
+                        <p>Calcula quantidade de tinta necessária</p>
+                        <div class="endpoint-details">
+                            <div class="endpoint-io">
+                                <div class="io-block">
+                                    <h5>Entrada</h5>
+                                    <pre><code>{
+  "total_area_m2": 100,
+  "coverage_m2_per_liter": 10,
+  "coats": 2,
+  "exclude_area_m2": 5
+}</code></pre>
+                                </div>
+                                <div class="io-block">
+                                    <h5>Saída</h5>
+                                    <pre><code>{
+  "paintable_area_m2": 95,
+  "liters_needed": 19,
+  "cans": {"18.0": 1, "3.6": 1},
+  "total_cans": 2,
+  "waste_liters": 2.6
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <code>/vtex/sku/{sku}/productId</code>
+                        </div>
+                        <p>Obtém o ProductId da VTEX a partir de um SKU</p>
+                        <div class="endpoint-details">
+                            <div class="endpoint-io">
+                                <div class="io-block full">
+                                    <h5>Exemplo</h5>
+                                    <pre><code>GET /vtex/sku/33375/productId
+
+→ {"sku": "33375", "found": true, "productId": 12345}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <code>/shipping/simulate</code>
+                        </div>
+                        <p>Simula frete na VTEX para uma lista de SKUs</p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <code>/shipping/simulate/slas</code>
+                        </div>
+                        <p>Retorna apenas {id, price} dos SLAs de frete</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>▶️ Como Executar</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Diretamente</span>
+python api.py
+
+<span class="comment"># Ou com uvicorn (recomendado)</span>
+uvicorn api:app --host 0.0.0.0 --port 8000 --reload</code></pre>
+                    </div>
+                    <p class="info-text">📍 API disponível em <code>http://localhost:8000</code></p>
+                    <p class="info-text">📖 Documentação automática: <code>http://localhost:8000/docs</code></p>
+                </div>
+            </section>
+
+            <!-- Search Products Section -->
+            <section id="search" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">search_products.py</span>
+                    <h1>Busca Híbrida de Produtos</h1>
+                    <p class="section-subtitle">Lógica principal de busca combinando múltiplas estratégias</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Este arquivo contém a <strong>lógica principal de busca</strong> de produtos. Implementa uma busca "híbrida" que combina várias estratégias para encontrar os produtos mais relevantes.</p>
+                </div>
+
+                <div class="card">
+                    <h2>🔍 Estratégias de Busca</h2>
+                    <div class="strategy-grid">
+                        <div class="strategy-card">
+                            <div class="strategy-number">1</div>
+                            <h4>Determinística (SKU/EAN)</h4>
+                            <p>Se a query for exatamente um SKU ou código de barras, retorna o produto diretamente.</p>
+                            <span class="strategy-example">Ex: "123456" → Produto com SKU 123456</span>
+                        </div>
+                        <div class="strategy-card">
+                            <div class="strategy-number">2</div>
+                            <h4>Vetorial (Embeddings)</h4>
+                            <p>Usa embeddings da OpenAI para encontrar produtos semanticamente similares.</p>
+                            <span class="strategy-example">Bom para: significado, sinônimos</span>
+                        </div>
+                        <div class="strategy-card">
+                            <div class="strategy-number">3</div>
+                            <h4>Full-Text</h4>
+                            <p>Busca tradicional por palavras usando índices do PostgreSQL.</p>
+                            <span class="strategy-example">Bom para: palavras exatas, variações</span>
+                        </div>
+                        <div class="strategy-card">
+                            <div class="strategy-number">4</div>
+                            <h4>Trigram (pg_trgm)</h4>
+                            <p>Encontra textos similares mesmo com erros de digitação.</p>
+                            <span class="strategy-example">Bom para: typos, nomes parciais</span>
+                        </div>
+                        <div class="strategy-card">
+                            <div class="strategy-number">5</div>
+                            <h4>Keyword (ILIKE)</h4>
+                            <p>Busca direta por palavras-chave no nome e descrição.</p>
+                            <span class="strategy-example">Bom para: "cimento", "tinta"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚖️ Fusão de Resultados</h2>
+                    <p>Os resultados são combinados usando pesos configuráveis:</p>
+                    <div class="weights-table">
+                        <div class="weight-row">
+                            <span class="weight-name">Vetorial</span>
+                            <div class="weight-bar" style="--width: 50%"></div>
+                            <span class="weight-value">50% (alpha)</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-name">Full-text</span>
+                            <div class="weight-bar" style="--width: 30%"></div>
+                            <span class="weight-value">30% (beta)</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-name">Trigram</span>
+                            <div class="weight-bar" style="--width: 10%"></div>
+                            <span class="weight-value">10% (gamma)</span>
+                        </div>
+                        <div class="weight-row">
+                            <span class="weight-name">Keyword</span>
+                            <div class="weight-bar" style="--width: 10%"></div>
+                            <span class="weight-value">10% (delta)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>💻 Uso via CLI</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code>python search_products.py --q "cimento 50kg" --k 10</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ingest CSV Section -->
+            <section id="ingest-csv" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">ingest_csv.py</span>
+                    <h1>Ingestão via CSV</h1>
+                    <p class="section-subtitle">Pipeline de importação de produtos a partir de arquivo CSV</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Responsável por <strong>importar produtos de um arquivo CSV</strong> para o banco de dados PostgreSQL. Processa cada linha, gera embeddings e insere no schema <code>rag</code>.</p>
+                </div>
+
+                <div class="card">
+                    <h2>🔄 Fluxo de Processamento</h2>
+                    <div class="flow-diagram">
+                        <div class="flow-step">
+                            <span class="flow-icon">📄</span>
+                            <span class="flow-label">CSV</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">📖</span>
+                            <span class="flow-label">Leitura</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">🔧</span>
+                            <span class="flow-label">Normalização</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">✂️</span>
+                            <span class="flow-label">Chunking</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">🧠</span>
+                            <span class="flow-label">Embeddings</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">🗄️</span>
+                            <span class="flow-label">PostgreSQL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📋 Colunas Esperadas no CSV</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Coluna</th>
+                                <th>Obrigatória</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>codigo_produto</code></td>
+                                <td><span class="badge required">✓</span></td>
+                                <td>SKU do produto</td>
+                            </tr>
+                            <tr>
+                                <td><code>descricao</code></td>
+                                <td><span class="badge required">✓</span></td>
+                                <td>Nome do produto</td>
+                            </tr>
+                            <tr>
+                                <td><code>descricao_tecnica</code></td>
+                                <td><span class="badge optional">○</span></td>
+                                <td>Descrição detalhada</td>
+                            </tr>
+                            <tr>
+                                <td><code>codigo_barras</code></td>
+                                <td><span class="badge optional">○</span></td>
+                                <td>EAN</td>
+                            </tr>
+                            <tr>
+                                <td><code>tipo</code></td>
+                                <td><span class="badge optional">○</span></td>
+                                <td>Categoria/tipo</td>
+                            </tr>
+                            <tr>
+                                <td><code>estoque</code></td>
+                                <td><span class="badge optional">○</span></td>
+                                <td>Quantidade em estoque</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2>▶️ Como Executar</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Editar constantes no arquivo e executar:</span>
+python ingest_csv.py</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ingest API Section -->
+            <section id="ingest-api" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">ingest_api.py</span>
+                    <h1>Ingestão via API</h1>
+                    <p class="section-subtitle">Pipeline de importação de produtos da API do Cubo</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Importa produtos diretamente da <strong>API do Cubo</strong> para o banco de dados. É uma alternativa ao <code>ingest_csv.py</code> que busca os dados de uma API externa.</p>
+                </div>
+
+                <div class="card">
+                    <h2>⚙️ Parâmetros CLI</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Opção</th>
+                                <th>Padrão</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>--termo</code></td>
+                                <td>"*"</td>
+                                <td>Termo de busca na API</td>
+                            </tr>
+                            <tr>
+                                <td><code>--page-size</code></td>
+                                <td>50</td>
+                                <td>Itens por página</td>
+                            </tr>
+                            <tr>
+                                <td><code>--start-page</code></td>
+                                <td>1</td>
+                                <td>Página inicial</td>
+                            </tr>
+                            <tr>
+                                <td><code>--limit-pages</code></td>
+                                <td>None</td>
+                                <td>Limitar páginas (para testes)</td>
+                            </tr>
+                            <tr>
+                                <td><code>--dry-run</code></td>
+                                <td>False</td>
+                                <td>Apenas simula, não grava</td>
+                            </tr>
+                            <tr>
+                                <td><code>--verbose, -v</code></td>
+                                <td>False</td>
+                                <td>Mostra logs detalhados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2>💻 Exemplos de Uso</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Ingerir tudo</span>
+python ingest_api.py --verbose
+
+<span class="comment"># Testar com 5 páginas</span>
+python ingest_api.py --limit-pages 5 --verbose
+
+<span class="comment"># Simulação sem gravar</span>
+python ingest_api.py --dry-run --limit-pages 10
+
+<span class="comment"># Continuar a partir da página 100</span>
+python ingest_api.py --start-page 100</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Paint Estimator Section -->
+            <section id="paint" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">paint_estimator.py</span>
+                    <h1>Estimador de Tinta</h1>
+                    <p class="section-subtitle">Cálculo de quantidade de tinta e composição de latas</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Calcula a <strong>quantidade de tinta necessária</strong> para pintar uma área e determina a <strong>melhor combinação de latas</strong> para comprar.</p>
+                </div>
+
+                <div class="card">
+                    <h2>📐 Fórmula de Cálculo</h2>
+                    <div class="formula-box">
+                        <p><strong>Área Pintável</strong> = Área Total − Área Excluída</p>
+                        <p><strong>Litros Necessários</strong> = (Área Pintável × Demãos) ÷ Rendimento</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🪣 Tamanhos de Lata Padrão</h2>
+                    <div class="cans-grid">
+                        <div class="can-item">
+                            <div class="can-size">18.0 L</div>
+                            <div class="can-desc">Galão grande</div>
+                        </div>
+                        <div class="can-item">
+                            <div class="can-size">3.6 L</div>
+                            <div class="can-desc">Galão médio</div>
+                        </div>
+                        <div class="can-item">
+                            <div class="can-size">2.5 L</div>
+                            <div class="can-desc">Intermediária</div>
+                        </div>
+                        <div class="can-item">
+                            <div class="can-size">0.9 L</div>
+                            <div class="can-desc">Lata pequena</div>
+                        </div>
+                        <div class="can-item">
+                            <div class="can-size">0.5 L</div>
+                            <div class="can-desc">Amostra/teste</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>💻 Exemplo de Uso</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="keyword">from</span> paint_estimator <span class="keyword">import</span> estimate_paint
+
+result = estimate_paint(
+    total_area_m2=<span class="number">100</span>,      <span class="comment"># 100m² de parede</span>
+    coverage_m2_per_liter=<span class="number">10</span>,  <span class="comment"># Tinta rende 10m²/L</span>
+    coats=<span class="number">2</span>,                <span class="comment"># 2 demãos</span>
+    exclude_area_m2=<span class="number">8</span>,      <span class="comment"># 8m² de portas/janelas</span>
+)
+
+<span class="comment"># Resultado:</span>
+<span class="comment"># {</span>
+<span class="comment">#   "paintable_area_m2": 92,</span>
+<span class="comment">#   "liters_needed": 18.4,</span>
+<span class="comment">#   "cans": {"18.0": 1, "0.9": 1},</span>
+<span class="comment">#   "waste_liters": 0.5</span>
+<span class="comment"># }</span></code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VTEX Shipping Section -->
+            <section id="vtex-shipping" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">vtex_shipping.py</span>
+                    <h1>Integração VTEX - Frete</h1>
+                    <p class="section-subtitle">Simulação de frete e consulta de SKUs na VTEX</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Integra com a <strong>plataforma VTEX</strong> para simular frete e consultar informações de SKU. É usado pela API para oferecer funcionalidades de e-commerce.</p>
+                </div>
+
+                <div class="card">
+                    <h2>🔧 Funções Principais</h2>
+                    <div class="functions-list">
+                        <div class="function-item">
+                            <h4><code>get_product_id_by_sku(ref_id)</code></h4>
+                            <p>Consulta a VTEX e retorna o ProductId a partir de um SKU.</p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>simulate_shipping_for_skus(items, postal_code, ...)</code></h4>
+                            <p>Simula frete para uma lista de SKUs.</p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>extract_slas_id_price(logistics_info)</code></h4>
+                            <p>Extrai apenas {id, price} dos SLAs retornados.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🌐 Endpoints VTEX Utilizados</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Endpoint</th>
+                                <th>Método</th>
+                                <th>Uso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>/api/catalog/pvt/stockkeepingunit</code></td>
+                                <td><span class="method get small">GET</span></td>
+                                <td>Buscar SKU por RefId</td>
+                            </tr>
+                            <tr>
+                                <td><code>/api/checkout/pub/orderForms/simulation</code></td>
+                                <td><span class="method post small">POST</span></td>
+                                <td>Simular frete</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- VTEX Client Section -->
+            <section id="vtex-client" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">vtex_client.py</span>
+                    <h1>Cliente VTEX Simples</h1>
+                    <p class="section-subtitle">Consulta básica de SKU via CLI ou biblioteca</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Cliente VTEX <strong>simples</strong> para consultar informações de SKU via linha de comando ou como biblioteca. É uma versão mais básica do <code>vtex_shipping.py</code>.</p>
+                </div>
+
+                <div class="card">
+                    <h2>💻 Uso via CLI</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Consultar um SKU</span>
+python vtex_client.py 33375
+
+<span class="comment"># Saída: JSON com dados completos do SKU</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📊 Códigos de Saída</h2>
+                    <table class="data-table compact">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Significado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>0</code></td>
+                                <td>Sucesso</td>
+                            </tr>
+                            <tr>
+                                <td><code>1</code></td>
+                                <td>Parâmetro faltando</td>
+                            </tr>
+                            <tr>
+                                <td><code>2</code></td>
+                                <td>Erro na requisição</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Fetch Cubo Section -->
+            <section id="fetch-cubo" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">fetch_cubo_produtos.py</span>
+                    <h1>Consulta API Cubo</h1>
+                    <p class="section-subtitle">Verificar totais de produtos na API externa</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Consulta a <strong>API do Cubo</strong> e retorna informações sobre o total de produtos disponíveis. Útil para verificar quantos produtos existem antes de fazer uma ingestão completa.</p>
+                </div>
+
+                <div class="card">
+                    <h2>💻 Uso via CLI</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Buscar totais de todos os produtos</span>
+python fetch_cubo_produtos.py
+
+<span class="comment"># Buscar totais com termo específico</span>
+python fetch_cubo_produtos.py "cimento"
+
+<span class="comment"># Saída:</span>
+{"total": 76720, "totalPages": 1535}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Head CSV Section -->
+            <section id="head-csv" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">head_csv.py</span>
+                    <h1>Extrair Primeiras Linhas do CSV</h1>
+                    <p class="section-subtitle">Criar amostras de teste a partir de CSVs grandes</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p>Extrai as <strong>primeiras N linhas</strong> de um arquivo CSV grande e salva em um novo arquivo menor. Útil para criar amostras de teste.</p>
+                </div>
+
+                <div class="card">
+                    <h2>⚙️ Configuração</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">python</span>
+                        </div>
+                        <pre><code>INPUT_FILE = <span class="string">"./documents/produtos-cubo.csv"</span>
+COUNT = <span class="number">200</span>  <span class="comment"># Quantidade de linhas</span>
+OUTPUT_FILE = <span class="string">"resumido_200.csv"</span>
+DELIMITER = <span class="string">";"</span>
+INCLUDE_HEADER = <span class="keyword">True</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>✨ Vantagens sobre <code>head</code> do terminal</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Aspecto</th>
+                                <th>head_csv.py</th>
+                                <th>head -n 200</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Campos com quebra de linha</td>
+                                <td><span class="badge success">✓ Trata</span></td>
+                                <td><span class="badge error">✗ Pode cortar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Encoding</td>
+                                <td><span class="badge success">Configurável</span></td>
+                                <td><span class="badge warning">Depende</span></td>
+                            </tr>
+                            <tr>
+                                <td>Delimitador</td>
+                                <td><span class="badge success">Configurável</span></td>
+                                <td><span class="badge error">N/A</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Count CSV Section -->
+            <section id="count-csv" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">count_csv_rows.py</span>
+                    <h1>Contar Registros CSV</h1>
+                    <p class="section-subtitle">Validar integridade de arquivos CSV</p>
+                </div>
+
+                <div class="card">
+                    <h2>📌 O que faz?</h2>
+                    <p><strong>Conta o número de registros</strong> em um arquivo CSV, respeitando corretamente campos com quebras de linha e aspas.</p>
+                </div>
+
+                <div class="card">
+                    <h2>💻 Uso via CLI</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code>python count_csv_rows.py
+
+<span class="comment"># Saída:</span>
+Arquivo: ./documents/produtos-cubo.csv
+Cabeçalho: 1
+Registros (dados): 76720
+Total de linhas (arquivo): 76721</code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🆚 Por que não usar <code>wc -l</code>?</h2>
+                    <div class="comparison-box">
+                        <div class="comparison-item">
+                            <code>wc -l</code>
+                            <span class="comparison-desc">Conta cada <code>\n</code> como linha</span>
+                            <span class="badge error">❌ Impreciso</span>
+                        </div>
+                        <div class="comparison-item">
+                            <code>count_csv_rows.py</code>
+                            <span class="comparison-desc">Conta registros lógicos</span>
+                            <span class="badge success">✓ Preciso</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Debug Section -->
+            <section id="debug" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">debug scripts</span>
+                    <h1>Scripts de Debug</h1>
+                    <p class="section-subtitle">Ferramentas para diagnóstico e investigação</p>
+                </div>
+
+                <div class="card">
+                    <h2>🔧 Scripts Disponíveis</h2>
+                    <div class="debug-scripts-grid">
+                        <div class="debug-card">
+                            <h4>analyze_missing_skus.py</h4>
+                            <p>Analisa por que alguns produtos não são importados (SKU inválido/vazio)</p>
+                            <code>python analyze_missing_skus.py [pages]</code>
+                        </div>
+                        <div class="debug-card">
+                            <h4>debug_pagination.py</h4>
+                            <p>Verifica se a paginação da API está funcionando corretamente</p>
+                            <code>python debug_pagination.py</code>
+                        </div>
+                        <div class="debug-card">
+                            <h4>debug_response_structure.py</h4>
+                            <p>Analisa a estrutura exata da resposta da API do Cubo</p>
+                            <code>python debug_response_structure.py</code>
+                        </div>
+                        <div class="debug-card">
+                            <h4>peek_cubo_page.py</h4>
+                            <p>Visualiza estrutura de uma página do Cubo (simples, sem deps)</p>
+                            <code>python peek_cubo_page.py</code>
+                        </div>
+                        <div class="debug-card">
+                            <h4>test_pagination_bug.py</h4>
+                            <p>Identifica exatamente onde a paginação para de funcionar</p>
+                            <code>python test_pagination_bug.py</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Requirements Section -->
+            <section id="requirements" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">requirements.txt</span>
+                    <h1>Dependências Python</h1>
+                    <p class="section-subtitle">Pacotes necessários para executar o projeto</p>
+                </div>
+
+                <div class="card">
+                    <h2>📦 Dependências</h2>
+                    <div class="deps-grid">
+                        <div class="dep-card">
+                            <div class="dep-name">fastapi</div>
+                            <div class="dep-desc">Framework web para a API</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">uvicorn[standard]</div>
+                            <div class="dep-desc">Servidor ASGI para rodar FastAPI</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">psycopg2-binary</div>
+                            <div class="dep-desc">Driver PostgreSQL</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">python-dotenv</div>
+                            <div class="dep-desc">Carregar variáveis do .env</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">openai</div>
+                            <div class="dep-desc">Gerar embeddings</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">tiktoken</div>
+                            <div class="dep-desc">Contar tokens para chunking</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">requests</div>
+                            <div class="dep-desc">Requisições HTTP</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">pandas</div>
+                            <div class="dep-desc">Processamento de CSV</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">tqdm</div>
+                            <div class="dep-desc">Barras de progresso</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚡ Instalação</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Criar ambiente virtual (recomendado)</span>
+python -m venv .venv
+
+<span class="comment"># Ativar ambiente</span>
+<span class="comment"># Windows:</span>
+.venv\Scripts\activate
+<span class="comment"># Linux/Mac:</span>
+source .venv/bin/activate
+
+<span class="comment"># Instalar dependências</span>
+pip install -r requirements.txt</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deploy Fly.io Section -->
+            <section id="deploy-flyio" class="doc-section">
+                <div class="section-header">
+                    <span class="file-badge">deploy-fly-io.md</span>
+                    <h1>Deploy na Fly.io</h1>
+                    <p class="section-subtitle">Guia completo para fazer deploy desta aplicação FastAPI na Fly.io</p>
+                </div>
+
+                <div class="card highlight-card">
+                    <h2>🚀 O que é a Fly.io?</h2>
+                    <p>A <strong>Fly.io</strong> é uma plataforma de hospedagem global que permite rodar aplicações próximas dos seus usuários, oferecendo auto-scaling, networking privado e infraestrutura gerenciada.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🌍</span>
+                        <h3>Deploy Global</h3>
+                        <p>Execute sua aplicação em múltiplas regiões simultaneamente</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">⚡</span>
+                        <h3>Auto-scaling</h3>
+                        <p>Máquinas param quando ociosas, economizando custos</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🔒</span>
+                        <h3>HTTPS Grátis</h3>
+                        <p>Certificados SSL automáticos e gratuitos</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">💰</span>
+                        <h3>Plano Gratuito</h3>
+                        <p>3 VMs compartilhadas e 3GB de armazenamento grátis</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📋 Pré-requisitos</h2>
+                    <div class="env-table">
+                        <div class="env-group">
+                            <h4>Requisitos</h4>
+                            <div class="env-item"><code>Git</code><span>Controle de versão</span></div>
+                            <div class="env-item"><code>Python 3.10+</code><span>Para testes locais</span></div>
+                            <div class="env-item"><code>Conta Fly.io</code><span>fly.io/app/sign-up</span></div>
+                        </div>
+                        <div class="env-group">
+                            <h4>Variáveis de Ambiente</h4>
+                            <div class="env-item"><code>DB_*</code><span>Configuração PostgreSQL</span></div>
+                            <div class="env-item"><code>OPENAI_API_KEY</code><span>API OpenAI</span></div>
+                            <div class="env-item"><code>VTEX_*</code><span>Integração VTEX</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>1️⃣ Instalação do Fly CLI</h2>
+                    <p>O <strong>flyctl</strong> (ou <code>fly</code>) é a ferramenta de linha de comando para interagir com a Fly.io.</p>
+                    
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">Windows (PowerShell)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code>pwsh -Command "iwr https://fly.io/install.ps1 -useb | iex"</code></pre>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">macOS (Homebrew)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code>brew install flyctl</code></pre>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">Linux/macOS (Script)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code>curl -L https://fly.io/install.sh | sh</code></pre>
+                    </div>
+
+                    <p class="info-text">✅ Verificar instalação: <code>fly version</code></p>
+                </div>
+
+                <div class="card">
+                    <h2>2️⃣ Autenticação</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Criar conta (se necessário)</span>
+fly auth signup
+
+<span class="comment"># Login (conta existente)</span>
+fly auth login</code></pre>
+                    </div>
+                    <p class="info-text">📌 O navegador será aberto automaticamente para autenticação.</p>
+                </div>
+
+                <div class="card">
+                    <h2>3️⃣ Criar o Dockerfile</h2>
+                    <p>Crie um arquivo <code>Dockerfile</code> na raiz do projeto:</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">dockerfile</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Imagem base Python</span>
+<span class="keyword">FROM</span> python:3.11-slim-bookworm
+
+<span class="comment"># Variáveis de ambiente</span>
+<span class="keyword">ENV</span> PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+<span class="comment"># Diretório de trabalho</span>
+<span class="keyword">WORKDIR</span> /app
+
+<span class="comment"># Instalar dependências do sistema</span>
+<span class="keyword">RUN</span> apt-get update && apt-get install -y --no-install-recommends \
+    gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+
+<span class="comment"># Copiar e instalar dependências Python</span>
+<span class="keyword">COPY</span> requirements.txt .
+<span class="keyword">RUN</span> pip install --upgrade pip && pip install -r requirements.txt
+
+<span class="comment"># Copiar código da aplicação</span>
+<span class="keyword">COPY</span> . .
+
+<span class="comment"># Expor porta</span>
+<span class="keyword">EXPOSE</span> 8000
+
+<span class="comment"># Comando de inicialização</span>
+<span class="keyword">CMD</span> ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]</code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>4️⃣ Configurar fly.toml</h2>
+                    <p>Execute <code>fly launch --no-deploy</code> ou crie manualmente:</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">toml</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Nome da aplicação (deve ser único!)</span>
+app = <span class="string">"search-products-api"</span>
+
+<span class="comment"># Região principal (gru = São Paulo)</span>
+primary_region = <span class="string">"gru"</span>
+
+[build]
+  dockerfile = <span class="string">"Dockerfile"</span>
+
+[http_service]
+  internal_port = <span class="number">8000</span>
+  force_https = <span class="keyword">true</span>
+  auto_stop_machines = <span class="string">"stop"</span>
+  auto_start_machines = <span class="keyword">true</span>
+  min_machines_running = <span class="number">0</span>
+
+[[vm]]
+  cpu_kind = <span class="string">"shared"</span>
+  cpus = <span class="number">1</span>
+  memory = <span class="string">"512mb"</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>5️⃣ Configurar Secrets (Variáveis Sensíveis)</h2>
+                    <p class="info-text">⚠️ <strong>IMPORTANTE:</strong> Nunca coloque senhas ou API keys no <code>fly.toml</code>!</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Banco de dados PostgreSQL</span>
+fly secrets set DB_HOST="seu-host-postgres.exemplo.com"
+fly secrets set DB_PORT="5432"
+fly secrets set DB_USER="seu_usuario"
+fly secrets set DB_PASSWORD="sua_senha_segura"
+fly secrets set DB_NAME="nome_do_banco"
+
+<span class="comment"># OpenAI API</span>
+fly secrets set OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxx"
+
+<span class="comment"># VTEX (se aplicável)</span>
+fly secrets set VTEX_APP_KEY="sua_vtex_app_key"
+fly secrets set VTEX_APP_TOKEN="seu_vtex_app_token"
+fly secrets set VTEX_ACCOUNT_HOST="sua-loja.myvtex.com"
+
+<span class="comment"># Verificar secrets configurados</span>
+fly secrets list</code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>6️⃣ Deploy da Aplicação</h2>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="comment"># Fazer o deploy</span>
+fly deploy
+
+<span class="comment"># Verificar status</span>
+fly status
+
+<span class="comment"># Abrir no navegador</span>
+fly open</code></pre>
+                    </div>
+                    
+                    <div class="flow-diagram">
+                        <div class="flow-step">
+                            <span class="flow-icon">📦</span>
+                            <span class="flow-label">Build</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">⬆️</span>
+                            <span class="flow-label">Push</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">🚀</span>
+                            <span class="flow-label">Deploy</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">✅</span>
+                            <span class="flow-label">Health Check</span>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">
+                            <span class="flow-icon">🌐</span>
+                            <span class="flow-label">Online!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔧 Comandos Úteis</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Comando</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>fly status</code></td>
+                                <td>Ver status da aplicação</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly logs</code></td>
+                                <td>Ver logs em tempo real</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly open</code></td>
+                                <td>Abrir aplicação no navegador</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly ssh console</code></td>
+                                <td>Acessar terminal da máquina</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly apps restart</code></td>
+                                <td>Reiniciar a aplicação</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly scale count 2</code></td>
+                                <td>Escalar para 2 máquinas</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly scale memory 1024</code></td>
+                                <td>Aumentar RAM para 1GB</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly releases</code></td>
+                                <td>Ver histórico de releases</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly releases rollback</code></td>
+                                <td>Voltar para versão anterior</td>
+                            </tr>
+                            <tr>
+                                <td><code>fly dashboard</code></td>
+                                <td>Abrir painel de métricas</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2>🌎 Regiões Disponíveis</h2>
+                    <div class="deps-grid">
+                        <div class="dep-card">
+                            <div class="dep-name">gru</div>
+                            <div class="dep-desc">🇧🇷 São Paulo, Brasil</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">iad</div>
+                            <div class="dep-desc">🇺🇸 Virginia, EUA</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">ewr</div>
+                            <div class="dep-desc">🇺🇸 New Jersey, EUA</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">lhr</div>
+                            <div class="dep-desc">🇬🇧 Londres, UK</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">fra</div>
+                            <div class="dep-desc">🇩🇪 Frankfurt, Alemanha</div>
+                        </div>
+                        <div class="dep-card">
+                            <div class="dep-name">nrt</div>
+                            <div class="dep-desc">🇯🇵 Tóquio, Japão</div>
+                        </div>
+                    </div>
+                    <p class="info-text">📍 Ver todas: <code>fly platform regions</code></p>
+                </div>
+
+                <div class="card">
+                    <h2>⚠️ Troubleshooting</h2>
+                    <div class="debug-scripts-grid">
+                        <div class="debug-card">
+                            <h4>Deploy falha no build</h4>
+                            <p>Verifique se <code>requirements.txt</code> está correto e adicione dependências do sistema no Dockerfile.</p>
+                            <code>apt-get install gcc libpq-dev</code>
+                        </div>
+                        <div class="debug-card">
+                            <h4>Health check falha</h4>
+                            <p>Verifique os logs com <code>fly logs</code> e confirme que a porta é 8000.</p>
+                            <code>fly logs --tail</code>
+                        </div>
+                        <div class="debug-card">
+                            <h4>Erro de conexão com banco</h4>
+                            <p>Verifique se o banco permite conexões externas e os secrets estão configurados.</p>
+                            <code>fly secrets list</code>
+                        </div>
+                        <div class="debug-card">
+                            <h4>Cold start lento</h4>
+                            <p>Configure <code>min_machines_running = 1</code> no fly.toml para manter máquina ativa.</p>
+                            <code>min_machines_running = 1</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>✅ Checklist de Deploy</h2>
+                    <div class="functions-list">
+                        <div class="function-item">
+                            <h4><code>[ ]</code> Fly CLI instalado</h4>
+                            <p>Verificar com: <code>fly version</code></p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>[ ]</code> Autenticado</h4>
+                            <p>Login realizado com: <code>fly auth login</code></p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>[ ]</code> Dockerfile criado</h4>
+                            <p>Testado localmente com: <code>docker build -t api .</code></p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>[ ]</code> .dockerignore configurado</h4>
+                            <p>Sem arquivos .env no container!</p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>[ ]</code> fly.toml configurado</h4>
+                            <p>Nome único da app definido</p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>[ ]</code> Secrets configurados</h4>
+                            <p>Todos os secrets necessários: <code>fly secrets set ...</code></p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>[ ]</code> Deploy executado</h4>
+                            <p>Comando: <code>fly deploy</code></p>
+                        </div>
+                        <div class="function-item">
+                            <h4><code>[ ]</code> Aplicação testada</h4>
+                            <p>Abrir no navegador: <code>fly open</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📚 Recursos Adicionais</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Recurso</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Documentação oficial</td>
+                                <td><a href="https://fly.io/docs" target="_blank" style="color: var(--accent-primary);">fly.io/docs</a></td>
+                            </tr>
+                            <tr>
+                                <td>Status da plataforma</td>
+                                <td><a href="https://status.fly.io" target="_blank" style="color: var(--accent-primary);">status.fly.io</a></td>
+                            </tr>
+                            <tr>
+                                <td>Comunidade</td>
+                                <td><a href="https://community.fly.io" target="_blank" style="color: var(--accent-primary);">community.fly.io</a></td>
+                            </tr>
+                            <tr>
+                                <td>Preços</td>
+                                <td><a href="https://fly.io/pricing" target="_blank" style="color: var(--accent-primary);">fly.io/pricing</a></td>
+                            </tr>
+                            <tr>
+                                <td>Documentação completa MD</td>
+                                <td><a href="../docs/deploy-fly-io.md" style="color: var(--accent-primary);">docs/deploy-fly-io.md</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <footer class="page-footer">
+            <p>Search Products API • Documentação Técnica</p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,2615 @@
+{
+  "name": "1. MCP COPAFER",
+  "nodes": [
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Nome: busca_lead_id\nPropósito: buscar no banco de dados (tabela `leads`) o registro de um lead a partir do telefone informado, retornando o `id` e metadados úteis.\nQuando usar: sempre que for necessário identificar o lead no banco ou recuperar informações básicas associadas ao telefone.\n\nEntradas:\n- telefone (string, obrigatório) — número de telefone usado como chave de busca.\n\nRegras:\n- O match deve ser exato pelo campo `telefone`.\n- Se houver múltiplos registros, retorne o mais recente (por data de criação ou atualização).\n- Caso não exista lead para o telefone informado, retorne erro estruturado.\n- Caso não tenha o telefone para colocar de input, opte pelo ID do pagarme que inicia com cus_\n\nSaídas (JSON Schema compacto):\n{\n  \"title\": \"BuscaLeadCompletoResponse\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"success\": { \"type\": \"boolean\" },\n    \"telefone\": { \"type\": \"string\" },\n    \"lead_id\": { \"type\": \"integer\" },\n    \"nome\": { \"type\": \"string\" },\n    \"email\": { \"type\": \"string\" },\n    \"cpf\": { \"type\": \"string\" },\n    \"cus_pagarme_id\": { \"type\": \"string\" },\n    \"carrinho_id\": { \"type\": \"string\" }\n  }\n}\n\nExemplo:\nEntrada:\n{\n  \"telefone\": \"+5511999998888\"\n}\n\nResposta (encontrado):\n{\n  \"success\": true,\n  \"telefone\": \"+5511999998888\",\n  \"lead_id\": 42,\n  \"nome\": \"Maria Oliveira\",\n  \"email\": \"maria@email.com\",\n  \"dados_relevantes\": \"Interessada em portas automáticas\",\n  \"carrinho_id\": \"cart_123\"\n}\n\nResposta (não encontrado):\n{\n  \"success\": false,\n  \"telefone\": \"+5511999998888\",\n  \"lead_id\": null\n}\n\nErros:\n- { \"error\": { \"code\": \"lead_not_found\", \"message\": \"Nenhum lead encontrado para o telefone informado.\" } }\n- { \"error\": { \"code\": \"db_error\", \"message\": \"Falha ao consultar o banco.\" } }\n",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "leads",
+          "mode": "list",
+          "cachedResultName": "leads"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "telefone",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', `Telefone do usuário`, 'string') }}"
+            },
+            {
+              "column": "cus_pagarme_id",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values1_Value', `ID do pagarme`, 'string') }}"
+            }
+          ]
+        },
+        "combineConditions": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -736,
+        448
+      ],
+      "id": "2d48fa42-f2c8-4f4e-87ce-7e79c477f67c",
+      "name": "busca_lead_id",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Nome: atualiza_lead\nPropósito: atualizar os dados de um lead na tabela `leads`, usando o telefone como chave de correspondência.\nQuando usar: sempre que o usuário fornecer ou confirmar informações pessoais (nome, email ou id do carrinho) que precisem ser salvas/atualizadas no banco. Ou então, quando criado um customer em um primeiro link de pagamento gerado no pagarme.\n\nEntradas:\n- telefone (string, obrigatório) — número de telefone usado para localizar o lead.\n- nome (string, opcional) — nome completo do lead. Se não existir, pergunte de forma natural e salve.\n- email (string, opcional) — e-mail do lead. Solicite apenas se surgir no contexto da conversa; se não informar, não insista.\n- cus_pagarme_id (string, opcional) - Só atualize se já não existir um\n- cod_loja_retira (integer, opcional) —\n  ID da loja para retirada. Informe apenas\n  quando o cliente optar por retirar o\n  pedido em loja física.\n\nRegras:\n- O match sempre é feito pelo campo `telefone`.  \n- Se o campo já existir, atualize mantendo os dados antigos + novos (quando aplicável).  \n- O e-mail só deve ser salvo se fornecido de forma voluntária.  \n- Se o nome não estiver no banco, capture de forma natural durante a interação.\n- Para encontrar o lead atualizado, sempre use seu telefone completo com código do país + DDD + Número.",
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "leads",
+          "mode": "list",
+          "cachedResultName": "leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telefone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('telefone__using_to_match_', `Telefone do usuário`, 'string') }}",
+            "nome": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nome', `Nome completo do lead.\nSe já existir no banco, utilize para personalizar a conversa.\nSe não existir, pergunte de forma natural e salve a resposta.`, 'string') }}",
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', `E-mail do lead\nSolicite apenas no caso dele ainda não ter esse campo preenchido.\nÉ obrigatório para quando for realizar um pedido e ainda não ter essa informação.`, 'string') }}",
+            "cpf": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cpf', `CPF do lead\nSolicite apenas no caso dele ainda não ter esse campo preenchido.\nÉ obrigatório para quando for realizar um pedido e ainda não ter essa informação.`, 'string') }}",
+            "cus_pagarme_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cus_pagarme_id', `ID do cliente no pagarme\nSempre ao gerar o primeiro link de pagamento , quando o lead ainda nao tem um cus_pagarme_id, vai enviar os dados cadastrais no link de pagamento e então com o retorno atualizar o lead. Se já tiver esse campo preenchido, use-o ao gerar o link de pagamento.`, 'string') }}",
+            "carrinho_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('carrinho_id', `ID do carrinho do lead`, 'string') }}",
+            "endereco": "={{ $fromAI('endereco', `  - endereco (objeto, obrigatório se\n  entrega, opcional se retirada) — dados do\n   endereço de entrega:\n    - tipolog (string) — tipo de logradouro\n   (Rua, Av, etc)\n    - logradouro (string) — nome da\n  rua/avenida\n    - numero (string) — número\n    - complemento (string, opcional) —\n  complemento\n    - bairro (string) — bairro\n    - cidade (string) — cidade\n    - estado (string, 2 chars) — UF\n    - cep (string, 8 chars) — CEP sem\n  formatação\n    - codibge (string) — código IBGE do\n  município\n    - codpais (string) — código do país\n  (ex: \"BRA\")\n\nSe não tiver o endereço ainda mande um objeto vazio.\n`, 'string') }}"
+          },
+          "matchingColumns": [
+            "telefone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefone",
+              "displayName": "telefone",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "dados_relevantes",
+              "displayName": "dados_relevantes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "carrinho_id",
+              "displayName": "carrinho_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status_followup",
+              "displayName": "status_followup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "carrinho_status",
+              "displayName": "carrinho_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "cpf",
+              "displayName": "cpf",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cus_pagarme_id",
+              "displayName": "cus_pagarme_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endereco",
+              "displayName": "endereco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -528,
+        464
+      ],
+      "id": "fd77f408-3fe9-42be-9a27-a2d8f3cce5fe",
+      "name": "atualiza_lead",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Cria um novo carrinho de compras no sistema e associa ao cliente em atendimento.\n\nQuando usar: sempre que o cliente demonstrar interesse em comprar.\n\nEntradas:\n- customerId (string, obrigatório) — identificador único do cliente. Necessário para vincular corretamente o carrinho à conversa. Pode ser obtido invocando a tool `busca_lead_id`.\n\nRegras:\n- O carrinho deve ser criado vazio, pronto para receber produtos.  \n- Associe o carrinho ao `customerId` informado.\n- O carrinho pode ser utilizado em etapas seguintes para adicionar itens, calcular frete e concluir o pedido.",
+        "method": "POST",
+        "url": "https://copafer.fortiddns.com/api/v2/cubo/addcart",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "customerId",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `customerId, string`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -416,
+        1120
+      ],
+      "id": "67ca9335-bb1e-424b-af5d-75204eda3100",
+      "name": "cria_carrinho",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "= Nome: busca_carrinho_id\n  Propósito: buscar informações completas\n  de um carrinho específico no banco de\n  dados (tabela `carrinho`), usando o\n  identificador do pedido.\n  Quando usar: sempre que precisar\n  recuperar os detalhes de um\n  carrinho/pedido específico, seja para\n  exibir ao cliente, processar pagamento,\n  ou atualizar status.\n\n  Entradas:\n  - lead_id (integer, obrigatório) — ID do \n  lead ao qual o carrinho pertence.\n  - status - deixar como aberto\n\n  Note que o cliente(lead) sempre terá apenas 1 carrinho aberto simultaneamente. Então sempre que precisar colher informações atuais é só verificar o único aberto.\n\n  Regras:\n  - O pedidoEcom é a chave \n  primária da tabela carrinho.\n  - A busca retorna apenas um registro \n  (match exato).\n  - Se o carrinho não existir ou não \n  pertencer ao lead_id informado, retorna\n  erro estruturado.\n  - Use esta tool quando o cliente\n  perguntar sobre um pedido específico ou\n  quando precisar dos detalhes completos do\n   carrinho.\n- Se não encontrar nada, é porque o cliente não tem um carrinho aberto e você deve criar um novo.\n\n\n  Saídas (JSON Schema compacto):\n  {\n    \"title\": \"BuscaCarrinhoIdResponse\",\n    \"type\": \"object\",\n    \"properties\": {\n      \"success\": { \"type\": \"boolean\" },\n      \"carrinho\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"pedidoEcom\": { \"type\": \"string\" \n  },\n          \"lead_id\": { \"type\": \"integer\" },\n          \"pagarme_link_id\": { \"type\":\n  \"string\" },\n          \"status\": { \"type\": \"string\",\n  \"enum\": [\"aberto\", \"fechado\"] },\n          \"produtos\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"codigo\": { \"type\":\n  \"string\" },\n                \"quantidade\": { \"type\":\n  \"integer\" },\n                \"preco\": { \"type\": \"number\"\n   },\n                \"valor\": { \"type\": \"number\"\n   }\n              }\n            }\n          },\n          \"endereco\": {\n            \"type\": \"object\",\n            \"properties\": {\n              \"tipolog\": { \"type\": \"string\"\n   },\n              \"logradouro\": { \"type\":\n  \"string\" },\n              \"numero\": { \"type\": \"string\"\n  },\n              \"complemento\": { \"type\":\n  \"string\" },\n              \"bairro\": { \"type\": \"string\"\n  },\n              \"cidade\": { \"type\": \"string\"\n  },\n              \"estado\": { \"type\": \"string\"\n  },\n              \"cep\": { \"type\": \"string\" },\n              \"codibge\": { \"type\": \"string\"\n   },\n              \"codpais\": { \"type\": \"string\"\n   }\n            }\n          },\n          \"data\": { \"type\": \"string\" },\n          \"hora\": { \"type\": \"string\" },\n          \"prazoEntrega\": { \"type\":\n  \"integer\" },\n          \"codLojaRetira\": { \"type\":\n  \"string\" },\n          \"codTransp\": { \"type\": \"string\"\n  },\n          \"vrprodutos\": { \"type\": \"number\"\n  },\n          \"vrfrete\": { \"type\": \"number\" },\n          \"vrtotal\": { \"type\": \"number\" },\n          \"observacao\": { \"type\": \"string\"\n  },\n          \"financeiro\": {\n            \"type\": \"object\",\n            \"properties\": {\n              \"codigoForma\": { \"type\":\n  \"string\" },\n              \"valor\": { \"type\": \"number\" }\n            }\n          },\n          \"criado_em\": { \"type\": \"string\"\n  },\n          \"atualizado_em\": { \"type\":\n  \"string\" }\n        }\n      }\n    }\n  }\n\n  Exemplo de Uso:\n  Entrada:\n  {\n    \"lead_id\": 42,\n    \"status\": \"aberto\"\n  }\n\n  Resposta (encontrado):\n  {\n    \"success\": true,\n    \"carrinho\": {\n      \"pedidoEcom\": \"PED20250127000001\",\n      \"lead_id\": 42,\n      \"pagarme_link_id\": \"link_abc123xyz\",\n      \"status\": \"aberto\",\n      \"produtos\": [\n        {\n          \"codigo\": \"PROD001\",\n          \"quantidade\": 2,\n          \"preco\": 150.00,\n          \"valor\": 300.00\n        },\n        {\n          \"codigo\": \"PROD002\",\n          \"quantidade\": 1,\n          \"preco\": 85.50,\n          \"valor\": 85.50\n        }\n      ],\n      \"endereco\": {\n        \"tipolog\": \"Rua\",\n        \"logradouro\": \"das Flores\",\n        \"numero\": \"123\",\n        \"complemento\": \"Apto 45\",\n        \"bairro\": \"Centro\",\n        \"cidade\": \"São Paulo\",\n        \"estado\": \"SP\",\n        \"cep\": \"01310100\",\n        \"codibge\": \"3550308\",\n        \"codpais\": \"BRA\"\n      },\n      \"data\": \"27/01/2025\",\n      \"hora\": \"14:30:00\",\n      \"prazoEntrega\": 5,\n      \"codTransp\": \"TRANSP01\",\n      \"vrprodutos\": 385.50,\n      \"vrfrete\": 25.00,\n      \"vrtotal\": 410.50,\n      \"observacao\": \"Entregar no período da\n   manhã\",\n      \"financeiro\": {\n        \"codigoForma\": \"PIX\",\n        \"valor\": 410.50\n      },\n      \"criado_em\":\n  \"2025-01-27T14:30:00-03:00\",\n      \"atualizado_em\":\n  \"2025-01-27T14:30:00-03:00\"\n    }\n  }\n\n  Resposta (não encontrado):\n  {\n    \"success\": false,\n    \"carrinho\": null,\n    \"message\": \"Carrinho não encontrado\n  para o pedidoEcom e lead_id informados.\"\n  }\n\n  Erros:\n  - { \"error\": { \"code\": \n  \"carrinho_nao_encontrado\", \"message\": \n  \"Nenhum carrinho encontrado com o \n  pedidoEcom informado.\" } }\n  - { \"error\": { \"code\": \n  \"lead_incompativel\", \"message\": \"O\n  carrinho existe mas não pertence ao\n  lead_id informado.\" } }\n  - { \"error\": { \"code\": \n  \"parametros_obrigatorios\", \"message\": \"É\n  necessário informar lead_id e \n  pedidoEcom.\" } }\n  - { \"error\": { \"code\": \"db_error\",\n  \"message\": \"Falha ao consultar o banco.\"\n  } }\n",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "carrinho",
+          "mode": "list",
+          "cachedResultName": "carrinho"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "lead_id",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', `ID do lead`, 'string') }}"
+            },
+            {
+              "column": "status",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values1_Value', `colocar \"aberto\" para retornar o carrinho aberto do lead`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        384,
+        1136
+      ],
+      "id": "17c4d5a3-17b9-4a0a-9d35-903c5947347b",
+      "name": "busca_carrinho_id",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Nome: adiciona_item\n\nPropósito: adicionar um item ao carrinho de compras ativo do cliente.\n\nQuando usar: sempre que o cliente escolher um produto para comprar e já houver um carrinho ativo associado.\n\nEntradas:\n- produtoId (string, obrigatório) — identificador único do produto (SKU ou ID interno).\n- quantidade (number, obrigatório) — quantidade do produto a ser adicionada.\n- precoUnidade (number, obrigatório) — preço unitário do produto (em BRL).\n- descontoUnidade (number, obrigatório) — valor do desconto aplicado por unidade. Se não houver desconto, informe 0.\n- carrinho_id (string, obrigatório) — identificador do carrinho ativo onde o item será adicionado.\n\nRegras:\n- Deve existir um carrinho ativo para que o item seja adicionado.  \n- Se o item já existir no carrinho, a `quantidade` deve ser incrementada.  \n- O campo `descontoUnidade` deve sempre ser enviado, mesmo que seja 0.  \n- Validar que `quantidade > 0`.  \n- O preço final do item é calculado como `(precoUnidade - descontoUnidade) * quantidade`.  \n- O carrinho deve manter consistência nos totais após a adição.",
+        "method": "POST",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://copafer.fortiddns.com/api/v2/cubo/[ID do carrinho]/items`, 'string') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "produtoId",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `Id do produto a ser adicionado ao carrinho.`, 'string') }}"
+            },
+            {
+              "name": "quantidade",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `Quantidade do produto a ser adicionado ao carrinho.`, 'string') }}"
+            },
+            {
+              "name": "precoUnidade",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `Preço unitário do produto.`, 'string') }}"
+            },
+            {
+              "name": "descontoUnidade",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', `Valor de desconto por unidade do produto a ser adicionado ao carrinho (se houver)`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        1136
+      ],
+      "id": "7ce96f01-2424-47e8-bb82-951f0202b167",
+      "name": "adiciona_item",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Nome: remove_item\n\nPropósito: remover um item específico de um carrinho de compras ativo do cliente.\n\nQuando usar: sempre que o cliente solicitar a exclusão de um produto do carrinho.\n\nPara obter o ID do carrinho ativo, utilize a tool `busca_carrinho_id`.\n\nEntradas:\n- carrinho_id (string, obrigatório) — identificador único do carrinho ativo do cliente.\n- produtoId (string, obrigatório) — identificador do produto a ser removido.\n\nRegras:\n- Substitua a variavel {produtoId} na url pelo ID do produto\n- O carrinho deve estar ativo para permitir remoções.  \n- Se o `produtoId` não estiver no carrinho, não deve alterar os itens. \n- Após a remoção, recalcular o total do carrinho.  \n- Se o carrinho ficar vazio, manter o carrinho ativo com total = 0. ",
+        "method": "DELETE",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `## URL\nhttps://copafer.fortiddns.com/api/v2/cubo/[cartId]/items/{produtoId}`, 'string') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        1136
+      ],
+      "id": "ee1f733e-6331-47d2-84a0-7dd0578fbacb",
+      "name": "remove_item",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Nome: atualiza_quantidade\n\nPropósito: atualizar a quantidade de um item específico em um carrinho de compras ativo do cliente.\n\nQuando usar: sempre que o cliente solicitar alteração de quantidade em um item já adicionado ao carrinho.\n\nEntradas:\n- cartId (string, obrigatório) — identificador único do carrinho ativo.\n- produtoId (string, obrigatório) — identificador único do produto dentro do carrinho.\n- quantidade (number, obrigatório) — nova quantidade desejada para o item.\n\nRegras:\n- O carrinho deve estar ativo para permitir a atualização.  \n- A `quantidade` deve ser maior que zero; se for 0, considere orientar o uso da tool `remove_item`.  \n- Se o produto não existir no carrinho, não alterar nada e retornar erro.  \n- O subtotal do item deve ser recalculado com base na nova quantidade.  \n- O total do carrinho deve ser atualizado de acordo.  ",
+        "method": "PUT",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://copafer.fortiddns.com/api/v2/cubo/{cartId}/items{produtoId}`, 'string') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "quantidade",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `Nova quantidade do item`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        1136
+      ],
+      "id": "da997a41-0f54-41e5-94b4-a23e50725478",
+      "name": "atualiza_quantidade",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Nome: ve_carrinho\n\nPropósito: consultar o conteúdo atual de um carrinho de compras ativo no sistema Copafer.\n\nQuando usar: sempre que o cliente solicitar revisar, conferir ou confirmar os itens antes de finalizar a compra ou continuar adicionando produtos.\nTambém deve ser usada antes de apresentar o resumo final do pedido para aprovação.\n\nEntradas:\n- https://copafer.fortiddns.com/api/v2/cubo/{cartId} onde {cartId} é o ID do carrinho.\n\nRegras:\n- Esta ferramenta **não altera** o carrinho, apenas retorna seu estado atual.\n- Envie apenas o número do carrinho. Jeito errado: cart_30; Jeito certo: 30;\n- Sempre retornar todos os itens com nome, quantidade, preço unitário, descontos e subtotal.  \n- O agente deve formatar a resposta para o cliente em lista clara e amigável (ex.: no WhatsApp), destacando produto, quantidade e preço de forma legível.  \n- Se o carrinho estiver vazio, retorne lista vazia com `totalCarrinho = 0`.  ",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://copafer.fortiddns.com/api/v2/cubo/{cartId}`, 'string') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        1136
+      ],
+      "id": "7903d2b0-1e50-4d6a-9313-82182ce9785c",
+      "name": "ve_carrinho",
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      },
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=calcula opções de frete e condições de pagamento para um carrinho.\n\nQuando usar: sempre que o usuário pedir preço de frete, prazo de entrega ou opções de retirada.\n\nEntradas:\n- vtex_id (string, obrigatório): ID Vtex do produto\n- quantidadeProduto (número, obrigatório): Quantidade do produto\n- cepEntrega (string, obrigatorio): CEP no formato 00000000\n\nRegras:\n- Valores monetários em centavos (inteiro).\n- shippingEstimate: \"Nbd\" (dias úteis) ou \"Nh\" (horas).",
+        "method": "POST",
+        "url": "=https://copafer.myvtex.com/api/checkout/pub/orderForms/simulation?sc=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('JSON', `{\n  \"items\": [\n    {\n      \"id\": \"{vtex_id}\",\n      \"quantity\": {quantidadeProduto},\n      \"seller\": \"1\"\n    }\n  ],\n  \"country\": \"BRA\",\n  \"postalCode\": \"{cepEntrega}\",\n  \"geoCoordinates\": []\n}`, 'json') }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        864
+      ],
+      "id": "0a728e24-f75c-4c3e-9921-50c15d73901a",
+      "name": "calcula_frete",
+      "alwaysOutputData": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        96
+      ],
+      "id": "9e1ff1fb-2d9a-434c-ad20-5cfcb1ff8b82",
+      "name": "calculadora"
+    },
+    {
+      "parameters": {
+        "path": "mcpcopafer"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -96
+      ],
+      "id": "ffe3a71b-b739-4eaf-ab67-00ec4f03efac",
+      "name": "MCP Server Trigger",
+      "webhookId": "2d5665a5-43b4-452b-874b-e31feecd03d3",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Objetivo:\nConsultar o status de um pedido e retornar uma resposta NORMALIZADA para o agente.\n\n## Endpoint:\nhttps://copafer.fortiddns.com/api/v2/cubo/rastreio?pedidoId={id_pedido}\n- Substitua {id_pedido} pelo id do pedido.\n\nEntrada (params):\n- id_pedido (string | number, obrigatório): ID do pedido a consultar. Não inclua espaços ou máscaras.\n\nComportamento:\n1) Faça a requisição GET ao endpoint com query param `pedidoId`.\n2) Em caso de HTTP 2xx e body `{\"success\": true, \"data\": {...}}`, normalize a saída aplicando o mapeamento abaixo.\n3) Em erros de rede/timeout/HTTP ≠ 2xx ou `success=false`, retorne `success:false` com `error`.\n\nNormalização de status (sempre preservar `status_code` original):\n- Base: ABER → \"Pedido recebido\"; SEPA → \"Pedido em separação\"; CONF/RCON → \"Pedido em processo de conferência\".\n- Regras por tipo de pedido:\n  * tipoPedido = \"RP\":\n    FATR → \"Pronto para retirada\"\n    ENCE → \"Pedido retirado\"\n  * tipoPedido = \"ET\":\n    FATR → \"Em processo de faturamento\"\n    ENCE → \"Pedido faturado\"\n- Qualquer outro código → \"Status desconhecido\".\n\nSaída (sempre JSON):\n{\n  \"success\": boolean,\n  \"pedidoId\": string | null,\n  \"tipoPedido\": \"RP\" | \"ET\" | null,\n  \"status_code\": string | null,        // valor de data.status\n  \"status_descricao\": string | null,   // valor normalizado pelas regras\n  \"fonte\": string | null,              // valor de data.fonte\n  \"raw\": object | null,                // body bruto recebido\n  \"error\": string | null               // mensagem de erro quando success=false\n}\n\nExemplo de sucesso (input: id_pedido=5117663):\n// Body recebido:\n{\n  \"success\": true,\n  \"message\": \"Status de tracking encontrado\",\n  \"data\": {\"pedidoId\":\"5117663\",\"tipoPedido\":\"RP\",\"status\":\"FATR\",\"fonte\":\"GIX\"}\n}\n// Saída normalizada:\n{\n  \"success\": true,\n  \"pedidoId\": \"5117663\",\n  \"tipoPedido\": \"RP\",\n  \"status_code\": \"FATR\",\n  \"status_descricao\": \"Pronto para retirada\",\n  \"fonte\": \"GIX\",\n  \"raw\": { ... },\n  \"error\": null\n}\n\nPolíticas:\n- Não perguntar pelo ID se já foi fornecido no contexto.\n- Não alterar o ID; apenas validar tipo (string/number).\n- Timeout recomendado: 8–10s. Sem retries automáticos aqui (o orquestrador decide).",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://copafer.fortiddns.com/api/v2/cubo/rastreio?pedidoId={id_pedido}`, 'string') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        2064,
+        880
+      ],
+      "id": "2413bf93-20b8-479b-ab31-3c6ec39425ee",
+      "name": "consulta_status_pedido1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "=# Propósito da tool `link_pagamento`\nGera um link de pagamento via Pagar.me. A ferramenta lida automaticamente com a criação ou identificação do cliente com base nos dados fornecidos;\n\n## Quando Usar\nUse esta ferramenta como a etapa final da venda, somente após ter todos os pré-requisitos atendidos;\n\n## PRÉ-REQUISITOS OBRIGATÓRIOS:\n**Cadastro Completo**: Antes de chamar esta ferramenta, use busca_lead_id para verificar se o cliente possui nome, e-mail e CPF. Se algo estiver faltando, colete a informação do cliente primeiro.\n**Carrinho Confirmado**: O cliente deve ter aprovado o resumo final do pedido (itens + frete).\n**Forma de Pagamento Escolhida**: O cliente deve ter definido explicitamente a forma de pagamento (\"pix\" ou \"credito\"). Siga o fluxo de persuasão para incentivar o PIX.\n\n## ENTRADAS (PARÂMETROS):\n\n### Dados do Pedido:\n- forma_pagamento (string, obrigatório): \"pix\" ou \"credito\".\n- items (array, obrigatório): Lista de itens no formato [{name, amount, default_quantity}]. O frete deve ser incluído como um item.\n- nome_pedido (string, obrigatório): Um nome para o pedido (ex: \"Pedido Copafer #12345\").\n- max_parcelas (number, opcional): Número máximo de parcelas permitidas (apenas para \"credito\"). Padrão é 10. **ATENÇÃO**: Este valor será ajustado automaticamente conforme a regra de parcelamento abaixo.\n\n### Dados do Cliente (obrigatório, obter via busca_lead_id):\n- cus_pagarme_id (string, opcional): O ID do cliente no Pagar.me (cus_...), se já existir no lead.\n- nome_cliente (string, obrigatório): Nome completo do cliente.\n- email_cliente (string, obrigatório): E-mail do cliente.\n- cpf_cliente (string, obrigatório): CPF do cliente (apenas números).\n- telefone_cliente (string, obrigatório): Telefone do cliente (Somente DDD + Número, SEM O CÓDIGO DO PAÍS)\n\n## REGRAS DE PARCELAMENTO (CARTÃO DE CRÉDITO):\nQuando a forma de pagamento for \"credito\", aplique OBRIGATORIAMENTE estas regras antes de chamar a ferramenta:\n\n| Regra | Valor |\n|-------|-------|\n| Máximo de parcelas permitidas | 10x |\n| Valor mínimo por parcela | R$100,00 |\n\n### Cálculo Obrigatório:\nAntes de definir o `max_parcelas`, calcule:\n```\nparcelas_pelo_valor = valor_total_pedido ÷ 100 (arredondar para baixo)\nmax_parcelas_final = menor valor entre (10, parcelas_pelo_valor)\n```\n\n### Exemplos Práticos:\n| Valor do Pedido | Cálculo | Parcelas Máximas |\n|-----------------|---------|------------------|\n| R$1.500,00 | 1500 ÷ 100 = 15 → min(10, 15) | **10x** de R$150,00 |\n| R$800,00 | 800 ÷ 100 = 8 → min(10, 8) | **8x** de R$100,00 |\n| R$350,00 | 350 ÷ 100 = 3 → min(10, 3) | **3x** de R$116,67 |\n| R$150,00 | 150 ÷ 100 = 1 → min(10, 1) | **1x** (à vista) |\n| R$80,00 | 80 ÷ 100 = 0 → min(10, 0) | **1x** (à vista) |\n\n**IMPORTANTE**: Se o valor total for menor que R$100,00, o parcelamento não é permitido. Informe ao cliente que pagamentos abaixo de R$100 no cartão são apenas à vista.\n\n## RETORNO E AÇÃO PÓS-EXECUÇÃO (MUITO IMPORTANTE):\n**Link de Pagamento**: A ferramenta retorna o link de pagamento na chave url. Apresente este link ao cliente;\n**ID do Cliente**: A resposta da API também inclui o ID do cliente no campo customer.id;\n**Ação Obrigatória**: Após receber a resposta, você DEVE chamar a ferramenta atualiza_lead imediatamente para salvar o valor de customer.id no campo cus_pagarme_id do lead. Isso garantirá que, na próxima compra, o cliente não precise ser cadastrado novamente;\n\n**ATENÇÃO**\nNão é permitido incluir nos itens itens com amount igual a zero. Isto é, quando for frete pago, adicione nos itens para ser cobrado. Quando for frete grátis, não adicione.",
+        "method": "POST",
+        "url": "https://api.pagar.me/core/v5/paymentlinks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "authorization",
+              "value": "Basic c2tfZGExb2VhRzRJUWZSbkVPUjo="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n(function() {\n    // --- PARÂMETROS OBRIGATÓRIOS DO PAGAMENTO ---\n    const formaPgto = $fromAI('forma_pagamento', 'Forma de pagamento: \"pix\", \"credito\" ou \"boleto\"', 'string');\n    const items = $fromAI('items', 'Array de itens do carrinho no formato [{name, amount, default_quantity}]', 'json');\n    const nomePedido = $fromAI('nome_pedido', 'Nome descritivo do pedido', 'string');\n    const maxParcelas = formaPgto === 'credito' ? ($fromAI('max_parcelas', 'Número máximo de parcelas para crédito', 'number') || 12) : 1;\n\n    // --- PARÂMETROS OBRIGATÓRIOS DO CLIENTE (obtidos com a ferramenta busca_lead_id) ---\n    const customerIdPagarme = $fromAI('cus_pagarme_id', 'ID do cliente no Pagar.me (cus_...), se já existir no cadastro do lead. Caso contrário, deixe em branco.', 'string');\n    const leadName = $fromAI('nome_cliente', 'Nome completo do cliente.', 'string');\n    const leadEmail = $fromAI('email_cliente', 'E-mail do cliente.', 'string');\n    const leadDocument = $fromAI('cpf_cliente', 'CPF do cliente (enviar somente os números).', 'string');\n  const leadPhone = $fromAI('telefone_cliente', 'Telefone do cliente com DDD e sem o código do país...', 'string');\nconst phoneClean = leadPhone.replace(/\\D/g, ''); //Remove formatação\n  const areaCode = phoneClean.substring(0, 2);  // DDD\n  const phoneNumber = phoneClean.substring(2);  //Número\n\n    // --- MONTAGEM DA REQUISIÇÃO ---\n    const totalAmount = items.reduce((sum, item) => sum + (item.amount * item.default_quantity), 0);\n    const paymentMethods = {\n        'pix': ['pix'],\n        'credito': ['credit_card'],\n        'boleto': ['boleto']\n    };\n\n  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();\n\n\n    const result = {\n        payment_settings: {\n            accepted_payment_methods: paymentMethods[formaPgto] || ['pix']\n        },\n        cart_settings: {\n            items: items\n        },\n        name: nomePedido,\n        type: 'order',\n        max_paid_sessions: 1,\n        max_sessions: 1,\n        expires_at: expiresAt\n    };\n\n    // --- LÓGICA CONDICIONAL PARA DADOS DO CLIENTE ---\n    const customer_settings = {};\n    if (customerIdPagarme) {\n        // Se o ID do cliente já existe, envia somente ele.\n        customer_settings.customer_id = customerIdPagarme;\n    } else {\n        // Se não existe, envia os dados para criar um novo cliente.\n        customer_settings.customer = {\n            name: leadName,\n            type: \"individual\",\n            email: leadEmail,\n            document_type: \"CPF\",\n            document: leadDocument,\n             phones: {\n                home_phone: {\n                    country_code: \"55\",\n                    area_code: areaCode,\n                    number: phoneNumber\n                }\n            }\n        };\n    }\n    result.customer_settings = customer_settings;\n\n    // --- CONFIGURAÇÕES POR FORMA DE PAGAMENTO ---\n    if (formaPgto === 'pix') {\n        result.payment_settings.pix_settings = {\n            expires_in: 3600 // Expira em 1 hora\n        };\n    } else if (formaPgto === 'credito') {\n        const installmentsArray = [];\n        for (let i = 1; i <= maxParcelas; i++) {\n            installmentsArray.push({ number: i, total: totalAmount });\n        }\n        result.payment_settings.credit_card_settings = {\n            operation_type: 'auth_and_capture',\n            installments: installmentsArray\n        };\n    } else if (formaPgto === 'boleto') {\n        result.payment_settings.boleto_settings = {\n            instructions: 'Pagar até o vencimento',\n            due_in: 3 // Vencimento em 3 dias\n        };\n    }\n\n    return result;\n})()\n}}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1712,
+        864
+      ],
+      "id": "563abfc1-3bcf-4994-b10b-5a906265fa78",
+      "name": "link_pagamento"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<tool_definition>\n  <metadata>\n    <name>obtem_vtex_id</name>\n    <version>1.0</version>\n    <author>Copafer Agent</author>\n  </metadata>\n\n  <function>\n    <name>obtem_vtex_id</name>\n    \n    <description>\n      Converte o código interno do produto (RefId/SKU) no identificador VTEX (ProductId) necessário para operações subsequentes como cálculo de frete, consulta de estoque e simulação de carrinho.\n      \n      Use esta ferramenta quando:\n      - O usuário fornecer um código de produto (RefId) e você precisar do ProductId VTEX\n      - Antes de chamar endpoints que exigem o ProductId (ex: simulação de frete)\n      - Para validar se um código de produto existe no catálogo VTEX\n      \n      Não use esta ferramenta quando:\n      - Já possuir o ProductId VTEX\n      - O usuário solicitar informações que não dependem do ProductId\n    </description>\n\n    <endpoint>\n      <method>GET</method>\n      <url>https://search-products-api.fly.dev/vtex/sku/{ref_id}/productId</url>\n      <base_url>https://search-products-api.fly.dev</base_url>\n      <path>/vtex/sku/{ref_id}/productId</path>\n    </endpoint>\n\n    <parameters>\n      <parameter>\n        <name>ref_id</name>\n        <type>string</type>\n        <location>path</location>\n        <required>true</required>\n        <description>\n          Código interno do produto (RefId/SKU) usado no sistema Copafer.\n          Geralmente é um código numérico como \"33375\".\n          Este é o código que o cliente ou vendedor usa para identificar produtos.\n        </description>\n        <examples>\n          <example>33375</example>\n          <example>12345</example>\n        </examples>\n      </parameter>\n    </parameters>\n\n    <response>\n      <success>\n        <http_status>200</http_status>\n        <content_type>application/json</content_type>\n        <schema>\n          <field>\n            <name>sku</name>\n            <type>string</type>\n            <description>O RefId enviado na requisição (eco do parâmetro)</description>\n          </field>\n          <field>\n            <name>found</name>\n            <type>boolean</type>\n            <description>Indica se o produto foi encontrado no catálogo VTEX</description>\n          </field>\n          <field>\n            <name>productId</name>\n            <type>integer</type>\n            <nullable>true</nullable>\n            <description>\n              O identificador único do produto na plataforma VTEX.\n              Presente apenas quando found=true.\n              Este é o valor que deve ser usado em operações subsequentes (vtex_id).\n            </description>\n          </field>\n        </schema>\n        \n        <example_found>\n          <description>Produto encontrado com sucesso</description>\n          <request>GET /vtex/sku/33375/productId</request>\n          <response_body>\n{\n  \"sku\": \"33375\",\n  \"found\": true,\n  \"productId\": 12345\n}\n          </response_body>\n          <output_format>vtex_id: 12345</output_format>\n        </example_found>\n\n        <example_not_found>\n          <description>Produto não encontrado no catálogo</description>\n          <request>GET /vtex/sku/99999/productId</request>\n          <response_body>\n{\n  \"sku\": \"99999\",\n  \"found\": false\n}\n          </response_body>\n          <output_format>Produto com RefId 99999 não encontrado no catálogo VTEX</output_format>\n        </example_not_found>\n      </success>\n\n      <errors>\n        <error>\n          <http_status>500</http_status>\n          <description>Erro interno do servidor ou falha na comunicação com a API VTEX</description>\n        </error>\n        <error>\n          <http_status>503</http_status>\n          <description>Serviço temporariamente indisponível</description>\n        </error>\n      </errors>\n    </response>\n\n    <output_instructions>\n      <instruction priority=\"1\">\n        Quando found=true, extraia o campo \"productId\" e retorne como \"vtex_id\"\n      </instruction>\n      <instruction priority=\"2\">\n        Formato de saída esperado: vtex_id: {valor_do_productId}\n      </instruction>\n      <instruction priority=\"3\">\n        Quando found=false, informe ao usuário que o produto não foi encontrado\n      </instruction>\n      <instruction priority=\"4\">\n        O vtex_id retornado deve ser armazenado para uso em operações subsequentes\n      </instruction>\n    </output_instructions>\n\n    <usage_examples>\n      <example>\n        <scenario>Usuário quer calcular frete de um produto</scenario>\n        <user_input>Qual o frete do produto 33375 para o CEP 01310-100?</user_input>\n        <tool_sequence>\n          <step order=\"1\">Chamar get_vtex_product_id com ref_id=\"33375\"</step>\n          <step order=\"2\">Obter vtex_id da resposta (ex: 12345)</step>\n          <step order=\"3\">Usar vtex_id para chamar endpoint de simulação de frete</step>\n        </tool_sequence>\n      </example>\n      \n      <example>\n        <scenario>Validar existência de produto</scenario>\n        <user_input>O produto ABC123 existe no catálogo?</user_input>\n        <tool_sequence>\n          <step order=\"1\">Chamar get_vtex_product_id com ref_id=\"ABC123\"</step>\n          <step order=\"2\">Verificar campo \"found\" na resposta</step>\n          <step order=\"3\">Informar usuário se produto existe ou não</step>\n        </tool_sequence>\n      </example>\n    </usage_examples>\n\n    <curl_example>\n      <description>Exemplo de requisição usando cURL</description>\n      <command>curl -X GET \"https://search-products-api.fly.dev/vtex/sku/33375/productId\"</command>\n    </curl_example>\n\n    <related_tools>\n      <tool>\n        <name>simulate_shipping</name>\n        <description>Usa o vtex_id para calcular opções de frete</description>\n        <dependency>Requer vtex_id obtido desta ferramenta</dependency>\n      </tool>\n    </related_tools>\n  </function>\n</tool_definition>\n",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://search-products-api.fly.dev/vtex/sku/{RefId}/productId`, 'string') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "X-VTEX-API-AppToken",
+              "value": "PITJPHPKKPBGFBUTVWNPIAZCTZSXFFKXGPMAXXSVONIGCXDNIFWFUZCYOYNCCRGXKCASXGUXXXXAMXVGLIXYWMPUFYKTYUGRXDTONOJFRBBGUCEDCBYHZJHHESPZQJLT"
+            },
+            {
+              "name": "X-VTEX-API-AppKey",
+              "value": "vtexappkey-copafer-ELDORB"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        864
+      ],
+      "id": "69810088-61f7-4656-ad97-aa3142205177",
+      "name": "obtem_vtex_id"
+    },
+    {
+      "parameters": {
+        "description": "=<Tool>\n  <Nome>calcula_quantidade_caixas_de_piso</Nome>\n  <Descricao>\n    Calcula a quantidade mínima de caixas inteiras de piso necessárias para cobrir uma determinada área. O cálculo considera automaticamente uma margem adicional de 15% para perdas técnicas, e o valor é sempre arredondado para cima.\n  </Descricao>\n  <QuandoUsar>\n    Use esta ferramenta apenas quando o cliente informar a área total a ser revestida em metros quadrados (m²) e quando a metragem que cada caixa cobre for conhecida.\n  </QuandoUsar>\n  <CamposEntrada>\n    <Campo nome=\"area\" tipo=\"number\" obrigatorio=\"true\">Área total da superfície a ser revestida, em metros quadrados.</Campo>\n    <Campo nome=\"qtde_cx\" tipo=\"number\" obrigatorio=\"true\">Metragem que cada caixa de piso cobre, também em metros quadrados (ex: 3.3).</Campo>\n  </CamposEntrada>\n  <Validacoes>\n    <Validacao>area deve ser maior que 0</Validacao>\n    <Validacao>qtde_cx deve ser maior que 0</Validacao>\n    <Validacao>Ambos os valores devem ser numéricos</Validacao>\n  </Validacoes>\n  <Saida>\n    <Formato>JSON</Formato>\n    <Exemplo>\n      {\n        \"area\": 25,\n        \"qtde_cx\": 3.3,\n        \"caixasNecessarias\": 8\n      }\n    </Exemplo>\n  </Saida>\n  <BoasPraticas>\n    <Pratica>O cálculo já inclui 15% extras para perdas técnicas</Pratica>\n    <Pratica>Arredondar sempre para cima (nunca frações de caixa)</Pratica>\n    <Pratica>Informar ao cliente que a estimativa considera margem de segurança</Pratica>\n    <Pratica>Sugerir complementares como argamassa e rejunte junto ao cálculo</Pratica>\n  </BoasPraticas>\n</Tool>\n",
+        "jsCode": "// A entrada deve ter os campos: area (m2) e qtde_cx (m2 por caixa)\n// Exemplo: { \"area\": 25, \"qtde_cx\": 3.3 }\n\nconst area = [area: number];\nconst qtde_cx = [qtde_cx: number];\n\nconst caixasNecessarias = Math.ceil((area / qtde_cx) + 0.15);\n\nreturn {\n  caixasNecessarias\n};"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        864,
+        864
+      ],
+      "id": "9e4ccd16-fb51-4abb-8ebc-3d0a63f542fc",
+      "name": "calcula_quantidade_caixas_de_piso"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=<InstrucaoTool nome=\"consulta_preco\">\n  <Uso>Use esta ferramenta quando o cliente fornecer o código Copafer diretamente ou após selecionar um produto identificado por `consulta_produto`.</Uso>\n  <PreCondicao>Evite usar se não tiver certeza do código do produto.</PreCondicao>\n  <PosCondicao>Valide os campos de preço e estoque no retorno. Se `preco == 0` ou `estoque_total == 0`, ignore o item e busque um equivalente automaticamente.</PosCondicao>\n  <RegraComplementar>Nunca mencionar produtos com estoque zerado ou preço ausente. Sempre apresentar apenas produtos disponíveis para venda.</RegraComplementar>\n</InstrucaoTool>\n",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://copafer.fortiddns.com/api/v2/cubo/produtos?termo={id_produto}`, 'string') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        464
+      ],
+      "id": "aa5c934e-95ef-408b-9aec-66b93850de67",
+      "name": "consulta_preco",
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j6i0O9YMcg3lfwQh",
+          "name": "X-Copafer Auth"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=<InstrucaoTool nome=\"consulta_produto\">\n  <Uso>Use esta ferramenta para buscar produtos quando o cliente mencionar nomes genéricos ou descrever uma necessidade (ex: “quero piso para cozinha”). Ou mesmo quando o cliente fornece um código de produto. Mas para uso posterior e para exibição do verdadeiro codigo de produto, considere sempre o campo sku retornado</Uso>\n  <PreCondicao>Não use esta ferramenta se o cliente fornecer um código Copafer diretamente.</PreCondicao>\n  <PosCondicao>Após receber o retorno, valide se os produtos possuem preço e estoque antes de exibir ao cliente.</PosCondicao>\n  <Limite>Exibir no máximo 3 itens priorizando os de maior score de relevância.</Limite>\n  <RegraComplementar>Nunca mencionar produtos sem preço ou estoque zerado. Buscar automaticamente alternativas quando necessário.</RegraComplementar>\n</InstrucaoTool>",
+        "method": "POST",
+        "url": "https://search-products-api.fly.dev/search",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `query`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        464
+      ],
+      "id": "2098c0ee-78a8-48c1-9f09-607c5695a1dc",
+      "name": "consulta_produto"
+    },
+    {
+      "parameters": {
+        "content": "## Carrinho",
+        "height": 320,
+        "width": 1264
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        736
+      ],
+      "typeVersion": 1,
+      "id": "7c3ac142-dc94-46e4-942e-21999fceee42",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Personalizadas",
+        "height": 320,
+        "width": 464,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        768,
+        736
+      ],
+      "typeVersion": 1,
+      "id": "b8b30acb-87bd-43fd-acc1-482f8f921724",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Frete e Pagamento",
+        "height": 320,
+        "width": 1312,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1280,
+        736
+      ],
+      "typeVersion": 1,
+      "id": "2bb4de28-bacc-444c-89e8-8c810d5a8d0d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Lead",
+        "height": 352,
+        "width": 496,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        336
+      ],
+      "typeVersion": 1,
+      "id": "3f3faaa9-6bd5-4307-bb5e-9f46d3f1bdc1",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Produto",
+        "height": 352,
+        "width": 656,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        336
+      ],
+      "typeVersion": 1,
+      "id": "8ac79d4b-0ce3-4c95-8003-0a3d2565e04d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Verifica se a imagem do produto em questão existe no banco de dados.\n\n## Entrada obrigatória\nID do produto\n\n## Saída\n```json\n{\n    \"imageExists\": true,\n    \"IdProduto\": \"12672\"\n}\n```",
+        "method": "POST",
+        "url": "https://primary-production-ef755.up.railway.app/webhook/is-image-exists",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "produto_id",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `ID do produto em questão`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        464
+      ],
+      "id": "3ded83f3-f874-4cf2-b822-fd0a4d175823",
+      "name": "verifica_se_imagem_existe"
+    },
+    {
+      "parameters": {
+        "description": "Você é um analisador de páginas de produto. \nEntrada: código HTML cru de uma página da web. \nTarefa: \n1. Determinar se a página corresponde a um produto individual. \n2. Se for produto, extrair nome, categoria e marca (quando disponível). \n3. Gerar uma frase curta e objetiva no formato:\n\"Produto identificado: [NOME] - Categoria: [CATEGORIA] - Marca: [MARCA]\".\n4. Se não for produto, responda apenas \"Nenhum produto identificado\".\nRespeite esse formato, sem comentários adicionais.\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "KtvHA8jVWlvkoFnJ",
+          "mode": "list",
+          "cachedResultName": "extrair_conteudo_pagina"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        864
+      ],
+      "id": "9d9cd798-9350-48fa-a082-d5460672fc14",
+      "name": "extrai_conteudo_pagina"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Você deve usar o viaCEP sempre que o cliente informa seu CEP para adicionar ao seu cadastro para melhorar a experiência dele e não precisar perguntar várias coisas sobre seu endereço, somente número e complemento além do CEP.\n\nExemplo de retorno:\n {\n      \"cep\": \"01001-000\",\n      \"logradouro\": \"Praça da Sé\",\n      \"complemento\": \"lado ímpar\",\n      \"unidade\": \"\",\n      \"bairro\": \"Sé\",\n      \"localidade\": \"São Paulo\",\n      \"uf\": \"SP\",\n      \"estado\": \"São Paulo\",\n      \"regiao\": \"Sudeste\",\n      \"ibge\": \"3550308\",\n      \"gia\": \"1004\",\n      \"ddd\": \"11\",\n      \"siafi\": \"7107\"\n    }",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://viacep.com.br/ws/{cep}/json/`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        2256,
+        880
+      ],
+      "id": "6fbb9f2a-e503-4df3-b1ed-5ac80c874dc0",
+      "name": "obtem_endereco_pelo_cep"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=ATENÇÃO: O endereço do cliente deve sempre ser mandado, mesmo que seja retirada.",
+        "method": "POST",
+        "url": "https://proxy-cuboai.fly.dev/api/proxy-simple",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Target-URL",
+              "value": "https://177.85.39.199:8443/shx-integrador/srv/ServPubAdicionaPedido/V1"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "843dd138c396f83a488f09d43f855da9"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "cliente.cpfcnpj",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `CPF do lead (só numeros)`, 'string') }}"
+            },
+            {
+              "name": "cliente.nome",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `Nome do lead`, 'string') }}"
+            },
+            {
+              "name": "cliente.email",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `Email do lead`, 'string') }}"
+            },
+            {
+              "name": "cliente.foneddd",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', `DDD do Lead`, 'string') }}"
+            },
+            {
+              "name": "cliente.fonenumero",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', `Telefone do lead (sem DDD)`, 'string') }}"
+            },
+            {
+              "name": "endereco.tipolog",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters5_Value', `Tipo de logradouro`, 'string') }}"
+            },
+            {
+              "name": "endereco.logradouro",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters6_Value', `Logradouro do endereço do lead`, 'string') }}"
+            },
+            {
+              "name": "endereco.numero",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters7_Value', `Número do endereço do lead `, 'string') }}"
+            },
+            {
+              "name": "endereco.bairro",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters8_Value', `Bairro do endereço do lead`, 'string') }}"
+            },
+            {
+              "name": "endereco.cidade",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters9_Value', `Cidade do endereço do lead`, 'string') }}"
+            },
+            {
+              "name": "endereco.estado",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters10_Value', `Estado do lead em formato UF `, 'string') }}"
+            },
+            {
+              "name": "endereco.cep",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters11_Value', `CEP do lead (só numeros)`, 'string') }}"
+            },
+            {
+              "name": "endereco.codibge",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters12_Value', `codibge do endereço do lead`, 'string') }}"
+            },
+            {
+              "name": "endereco.codpais",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters13_Value', `Código do país do endereço - que é 55. `, 'string') }}"
+            },
+            {
+              "name": "endereco.complemento",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters14_Value', `Complemento do lead `, 'string') }}"
+            },
+            {
+              "name": "data",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters15_Value', `Data do pedido nesse formato: 20251001`, 'string') }}"
+            },
+            {
+              "name": "hora",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters16_Value', `Hora do pedido nesse formato: 143500`, 'string') }}"
+            },
+            {
+              "name": "vrprodutos",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters17_Value', `Valor total dos produtos (String nesse formato \"150.00\")`, 'string') }}"
+            },
+            {
+              "name": "vrtotal",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters18_Value', `Valor total dos produtos + frete (String nesse formato \"150.00\")`, 'string') }}"
+            },
+            {
+              "name": "vrfrete",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters19_Value', `Valor do frete (String nesse formato \"15.00\")  `, 'string') }}"
+            },
+            {
+              "name": "=observacao",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters20_Value', `Colocar o mesmo do campo observacao do carrinho do lead.`, 'string') }}"
+            },
+            {
+              "name": "produtos",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters21_Value', `Array obrigatório com todos produtos do pedido, nesse formato para cada item do array:\n{\n\t\t\t\"codigo\": \"10001\",\n\t\t\t\"um\": \"UN\",\n\t\t\t\"qtde\": \"2.0000\",\n\t\t\t\"preco\": \"75.00\",\n\t\t\t\"valor\": \"150.00\",\n\t\t\t\"desconto\": \"10.00\"\n\t\t}`, 'string') }}"
+            },
+            {
+              "name": "financeiro",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters22_Value', `Array que armazena dados financeiros do pedido, nesse formato cada objeto:\n\n\n{\n\t\t\t\"codigoForma\": \"CT\",\n\t\t\t\"valor\": \"160.00\"\n\t\t}\nREGRA INVIOLÁVEL:\n- codigoForma deve ser CT se cartão. Se PIX, deve ser PX. Já  valor deve ser exatamente o que foi registrado no campo financeiro.valor do carrinho\n\nAPENAS PARA codigoForma igual CT:\n- Se no webhook tiver dados de cartão, acrescente o campo cartao (objeto) com os campos codigoCartao (valor de acordo com o que retornar no webhook em last_transaction.acquirer_name , last_transaction.card.brand e last_transaction.card.type), numeroParcelas (Número de parcelas - o valor retornado no webhook em last_transaction.installments), data (string no formato AAAAMMDD), hora (string no formato HHMMSS), nsu (NSU (Número Sequencial Único - o valor retornado no webhook em last_transaction.acquirer_nsu)), autorizacao (Código da autorização - o valor retornado pelo webhook em  last_transaction.acquirer_auth_code), digitosCartao (Quatro últimos números do cartão de crédito - o valor retornado pelo webhook em last_transaction.card.last_four_digits)\n\nObserve que todos os campos do objeto cartao devem ser preenchidos de acordo com o retorno do webhook da pagarme, sem inventar nenhum dado. \n\nREGRA PARA O CAMPO codigoCartao, que é um campo para mandar só os numeros de acordo com a bandeira, adquirente e tipo do cartão:\n\nPara adquirente Getnet\n0000110  POS GETNET AMEX CREDITO  \n0000111  POS GETNET ELO CREDITO  \n0000118  POS GETNET ELO DEBITO  \n0000112  POS GETNET HIPERCARD CREDITO  \n0000113  POS GETNET MASTERCARD CREDITO  \n0000119  POS GETNET MASTER DEBITO  \n0000114  POS GETNET VISA CREDITO  \n0000120  POS GETNET VISA DEBITO\n\nPara adquirente Rede\n0000141  ECOMMERCE REDE AMEX CREDITO  \n0000139  ECOMMERCE REDE ELO CREDITO  \n0000135  ECOMMERCE REDE ELO DEBITO  \n0000140  ECOMMERCE REDE HIPER CREDITO  \n0000136  ECOMMERCE REDE HIPER DEBITO  \n0000137  ECOMMERCE REDE MASTER CREDITO  \n0000133  ECOMMERCE REDE MASTER DEBITO  \n0000138  ECOMMERCE REDE VISA CREDITO  \n0000134  ECOMMERCE REDE VISA DEBITO\n\n\n\nAPENAS se codigoForma é igual a PX:\n-> Envie um campo chamado \"boleto\". Um objeto com os subcampos assim\n\n\"boleto\": {\n                \"linhaDigitavel\": 0,\n                \"dataVencimento\": \"20251117\",\n                \"dataPagamento\": \"20251117\"\n            },\t\n\n\nlinhaDigitavel - sempre 0\ndataVencimento e dataPagamento sempre nesse formato e de acordo com a data do pagamento, pode deixar a mesma data nos dois.\n`, 'string') }}"
+            },
+            {
+              "name": "codLojaRetira",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters23_Value', `Apenas se for retirada, informar o número da loja assim como esta no carrinho.`, 'string') }}"
+            },
+            {
+              "name": "prazoEntrega",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters24_Value', `Prazo de entrega em dias úteis`, 'string') }}"
+            },
+            {
+              "name": "pedidoEcom",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters25_Value', `ID do pedido - você obtem isso no campo pedidoecom do carrinho do cliente`, 'string') }}"
+            },
+            {
+              "name": "vendedor",
+              "value": "1158"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        2448,
+        880
+      ],
+      "id": "1d2b4dcf-2e68-4f3e-bc4e-969de8b37434",
+      "name": "subir_pedido_erp",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "RigbkKwJ2UyGaYaW",
+          "name": "Gix"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "=# Propósito da tool `cancelar_link_pagamento`\nCancela um link de pagamento existente via Pagar.me. Após o cancelamento, o link não poderá mais ser utilizado pelo cliente para realizar o pagamento.\n\n## Quando Usar\nUse esta ferramenta quando for necessário invalidar um link de pagamento previamente gerado. \n\n### Cenários Comuns de Cancelamento:\n| Cenário | Descrição |\n|---------|-----------|\n| **Cliente desistiu** | O cliente informou que não deseja mais prosseguir com a compra |\n| **Pedido alterado** | O cliente quer adicionar/remover itens, exigindo um novo link com valores atualizados |\n| **Mudança de forma de pagamento** | O cliente pediu para trocar de cartão para PIX (ou vice-versa) |\n| **Erro no link** | Foi identificado um erro nos dados do link (valor, itens, parcelas) |\n| **Link expirado ou duplicado** | Necessário cancelar links antigos antes de gerar um novo |\n| **Solicitação do cliente** | O cliente explicitamente pediu para cancelar o pagamento |\n\n## PRÉ-REQUISITOS OBRIGATÓRIOS:\n\n### 1. Ter o ID do Link\nVocê precisa do `link_id` (ID do link de pagamento) para cancelá-lo. Este ID é retornado quando o link é criado pela ferramenta `link_pagamento` ou pode ser obtido consultando os dados do lead.\n\n### 2. Confirmar com o Cliente (Quando Aplicável)\n- Se o cliente não solicitou explicitamente o cancelamento, **confirme antes de cancelar**\n- Exemplo: *\"Entendi que você quer alterar o pedido. Vou cancelar o link atual e gerar um novo. Posso prosseguir?\"*\n\n### 3. Verificar Status do Link\n- Links já pagos **NÃO podem ser cancelados** (o pagamento já foi processado)\n- Links já cancelados não precisam ser cancelados novamente\n- Apenas links com status `active` ou `pending` podem ser cancelados\n\n## ENTRADAS (PARÂMETROS):\n\n| Parâmetro | Tipo | Obrigatório | Descrição |\n|-----------|------|-------------|-----------|\n| link_id | string | ✅ Sim | O ID do link de pagamento a ser cancelado (formato: `lnk_...` ou similar) |\n\n### Onde Encontrar o `link_id`:\n1. **Na resposta da criação**: Quando você chama `link_pagamento`, a resposta inclui o `id` do link criado\n2. **No lead**: Se o link foi salvo no lead anteriormente, busque via `busca_lead_id`\n3. **Na conversa**: Pode estar no histórico da conversa atual com o cliente\n\n## RETORNO E AÇÃO PÓS-EXECUÇÃO:\n\n### Resposta de Sucesso:\nA ferramenta retorna uma confirmação de que o link foi cancelado, incluindo:\n- `id`: O ID do link cancelado\n- `status`: Novo status do link (geralmente `canceled`)\n\n### Ações Após Cancelamento:\n1. **Informe o cliente**: Confirme que o link foi cancelado\n   - *\"Pronto! O link de pagamento anterior foi cancelado com sucesso.\"*\n\n2. **Próximos passos**: Dependendo do cenário:\n   - Se for gerar novo link: Prossiga com `link_pagamento`\n   - Se o cliente desistiu: Encerre o atendimento cordialmente\n   - Se houve alteração no pedido: Confirme o novo carrinho antes de gerar outro link\n\n3. **Atualizar o lead (se necessário)**: Se o link estava salvo no lead, considere limpar ou atualizar o campo correspondente\n\n## FLUXO TÍPICO DE USO:\n\n```\n1. Cliente: \"Quero adicionar mais um produto ao pedido\"\n2. Agente: Verifica que já existe um link ativo\n3. Agente: \"Vou cancelar o link atual e gerar um novo com todos os itens. Pode confirmar?\"\n4. Cliente: \"Sim, pode fazer\"\n5. Agente: Chama `cancelar_link_pagamento` com o link_id\n6. Agente: Atualiza o carrinho com o novo item\n7. Agente: Chama `link_pagamento` para gerar novo link\n8. Agente: \"Pronto! Aqui está o novo link de pagamento atualizado: [link]\"\n```\n\n## ATENÇÕES E AVISOS:\n\n⚠️ **IRREVERSÍVEL**: O cancelamento é permanente. O link cancelado não pode ser reativado.\n\n⚠️ **LINKS PAGOS**: Se o cliente já realizou o pagamento, o link não pode ser cancelado. Neste caso:\n- Verifique o status do pagamento\n- Se precisar desfazer, será necessário um processo de **estorno/reembolso** (diferente de cancelamento de link)\n\n⚠️ **NÃO GERE NOVO LINK AUTOMATICAMENTE**: Após cancelar, confirme com o cliente antes de gerar um novo link. O cliente pode ter desistido completamente.\n\n⚠️ **MÚLTIPLOS LINKS**: Se houver múltiplos links ativos para o mesmo cliente, certifique-se de cancelar o link correto.",
+        "method": "PATCH",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', `https://api.pagar.me/core/v5/paymentlinks/{payment_link_id}/cancel`, 'string') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "authorization",
+              "value": "Basic c2tfZGExb2VhRzRJUWZSbkVPUjo="
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1888,
+        864
+      ],
+      "id": "5436ff98-5982-40f9-9145-77b047816bbc",
+      "name": "cancelar_link_pagamento"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Quando usar?\n\nSempre que um cliente definir um endereço de entrega para seu carrinho",
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "carrinho",
+          "mode": "list",
+          "cachedResultName": "carrinho"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "atualizado_em": "={{ $now }}",
+            "endereco": "={{ $fromAI('endereco', `  - endereco (objeto, obrigatório se\n  entrega, opcional se retirada) — dados do\n   endereço de entrega:\n    - tipolog (string) — tipo de logradouro\n   (Rua, Av, etc)\n    - logradouro (string) — nome da\n  rua/avenida\n    - numero (string) — número\n    - complemento (string, opcional) —\n  complemento\n    - bairro (string) — bairro\n    - cidade (string) — cidade\n    - estado (string, 2 chars) — UF\n    - cep (string, 8 chars) — CEP sem\n  formatação\n    - codibge (string) — código IBGE do\n  município\n    - codpais (string) — código do país\n  (ex: \"BRA\")\n\nSe não tiver o endereço ainda mande um objeto vazio.\n`, 'string') }}",
+            "pedidoecom": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pedidoecom__using_to_match_', `Id DO Carrinho - caso o cliente tenha um carrinho aberto usar o que esta salvo em seu campo carrinho_id  `, 'string') }}",
+            "codlojaretira": "={{ null }}"
+          },
+          "matchingColumns": [
+            "pedidoecom"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pagarme_link_id",
+              "displayName": "pagarme_link_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "endereco",
+              "displayName": "endereco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pedidoecom",
+              "displayName": "pedidoecom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prazoentrega",
+              "displayName": "prazoentrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "codlojaretira",
+              "displayName": "codlojaretira",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "codtransp",
+              "displayName": "codtransp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrprodutos",
+              "displayName": "vrprodutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrfrete",
+              "displayName": "vrfrete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrtotal",
+              "displayName": "vrtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "observacao",
+              "displayName": "observacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "financeiro",
+              "displayName": "financeiro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -720,
+        1120
+      ],
+      "id": "6be2d9d4-a61e-4a83-a095-28410b5ba97a",
+      "name": "atualiza_endereco_carrinho",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Quando usar?\n\nSempre que o cliente optar pela retirada em uma das lojas.\n\nPara a unidade de Santo André, o codlojaretira é 1\nPara a unidade de Mauá, o codlojaretira é 3",
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "carrinho",
+          "mode": "list",
+          "cachedResultName": "carrinho"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "codlojaretira": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('codlojaretira', `Caso seja retirada , definir sendo 1 para caso o cliente opte para retirada na Loja Santo Andŕé e 3 para o caso dele escolher retirar na loja Mauá`, 'string') }}",
+            "pedidoecom": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pedidoecom__using_to_match_', ``, 'string') }}",
+            "vrfrete": 0,
+            "vrtotal": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrtotal', `Atualiza valor total carrinho considerando que aqui o frete sera zero. Isto é, o valor total sera apenas o valor dos produtos`, 'number') }}",
+            "prazoentrega": 1
+          },
+          "matchingColumns": [
+            "pedidoecom"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pagarme_link_id",
+              "displayName": "pagarme_link_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pedidoecom",
+              "displayName": "pedidoecom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prazoentrega",
+              "displayName": "prazoentrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "codlojaretira",
+              "displayName": "codlojaretira",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "codtransp",
+              "displayName": "codtransp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrprodutos",
+              "displayName": "vrprodutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrfrete",
+              "displayName": "vrfrete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "vrtotal",
+              "displayName": "vrtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "observacao",
+              "displayName": "observacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "financeiro",
+              "displayName": "financeiro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -320,
+        848
+      ],
+      "id": "e7168275-24e5-46c3-9a68-a1974708350d",
+      "name": "atualiza_lojaretirada_carrinho",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Quando usar?\n\nSempre logo após calcular o prazo de entrega para o cliente.",
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "carrinho",
+          "mode": "list",
+          "cachedResultName": "carrinho"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "atualizado_em": "={{ $now }}",
+            "prazoentrega": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('prazoentrega', `Prazo de entrega em dias úteis (int)`, 'number') }}",
+            "vrfrete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrfrete', `valor total frete  - use a calculadora`, 'number') }}",
+            "vrtotal": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrtotal', `valor total produtos + frete  - use a calculadora`, 'number') }}",
+            "pedidoecom": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pedidoecom__using_to_match_', `Id DO Carrinho - caso o cliente tenha um carrinho aberto usar o que esta salvo em seu campo carrinho_id  `, 'string') }}",
+            "observacao": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('observacao', `Adicione o nome do frete escolhido pelo cliente para identificação`, 'string') }}"
+          },
+          "matchingColumns": [
+            "pedidoecom"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pagarme_link_id",
+              "displayName": "pagarme_link_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pedidoecom",
+              "displayName": "pedidoecom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prazoentrega",
+              "displayName": "prazoentrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "codlojaretira",
+              "displayName": "codlojaretira",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "codtransp",
+              "displayName": "codtransp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrprodutos",
+              "displayName": "vrprodutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrfrete",
+              "displayName": "vrfrete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "vrtotal",
+              "displayName": "vrtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "observacao",
+              "displayName": "observacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "financeiro",
+              "displayName": "financeiro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        64,
+        848
+      ],
+      "id": "f3a03153-a7b4-42b8-9997-8e2c36fcc1b7",
+      "name": "atualiza_frete_carrinho",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Quando usar?\n\nSempre após usar a ferramenta de link_pagamento.\n\nApós usá-la, deve atualizar o pagarme_link_id e o campo financeiro. Caso no carrinho ja tenha um pagarme_link_id deve executar antes dessa tool a tool de cancelar_link_pagamento.",
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "carrinho",
+          "mode": "list",
+          "cachedResultName": "carrinho"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "atualizado_em": "={{ $now }}",
+            "pagarme_link_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pagarme_link_id', `Sempre que gerar um link da pagarme, grave-o aqui o seu id. ATENÇÃO: Enquanto não gerar nenhum link, não mexa nesse campo`, 'string') }}",
+            "financeiro": "={{ $fromAI('financeiro', `Em codigoForma sempre insira CT independente da forma de pagamento.\nEm valor, o valor total do pedido\nÉ para mandar nesse campo um array sem estar em formato de string. Se não tiver nada para colocar mande um objeto vazio.\nExemplo: [{\n\"codigoForma\":\"CT\",\n\"valor\": 912.12\n}]\n\n ATENÇÃO: Enquanto não gerar nenhum link, não mexa nesse campo`, 'string') }}",
+            "pedidoecom": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pedidoecom__using_to_match_', `Id DO Carrinho - caso o cliente tenha um carrinho aberto usar o que esta salvo em seu campo carrinho_id  `, 'string') }}"
+          },
+          "matchingColumns": [
+            "pedidoecom"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pagarme_link_id",
+              "displayName": "pagarme_link_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pedidoecom",
+              "displayName": "pedidoecom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prazoentrega",
+              "displayName": "prazoentrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "codlojaretira",
+              "displayName": "codlojaretira",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "codtransp",
+              "displayName": "codtransp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrprodutos",
+              "displayName": "vrprodutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrfrete",
+              "displayName": "vrfrete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrtotal",
+              "displayName": "vrtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "observacao",
+              "displayName": "observacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "financeiro",
+              "displayName": "financeiro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        256,
+        848
+      ],
+      "id": "13db546f-38e9-48b3-9a8c-885d038714a0",
+      "name": "atualiza_financeiro_carrinho",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=  Serve para atualizar um carrinho existente do lead. Note que pedidoEcom é igual ao campo carrinho_id do lead.\n\n  CAMPOS OBRIGATÓRIOS (NOT NULL):\n\n  1. lead_id - integer - Referência ao\n  cliente/lead (FK para tabela leads)\n  2. pedidoecom - varchar(30) - Código do\n  pedido (PK, gerado automaticamente pela\n  função gera_pedido_ecom())\n\n  CAMPOS OPCIONAIS:\n\n  3. pagarme_link_id - varchar(100) - ID do\n  link de pagamento Pagar.me\n  4. produtos - jsonb - Produtos do carrinho\n  em formato JSON\n  5. endereco - jsonb - Endereço de entrega\n  em formato JSON\n  6. data - varchar(10) - Data\n  7. hora - varchar(8) - Hora\n  8. prazoentrega - integer - Prazo de\n  entrega em dias\n  9. codlojaretira - varchar(50) - Código da\n  loja para retirada\n  10. codtransp - varchar(50) - Código da\n  transportadora\n  11. vrprodutos - numeric(10,2) - Valor dos\n  produtos\n  12. vrfrete - numeric(10,2) - Valor do\n  frete\n  13. vrtotal - numeric(10,2) - Valor total\n  do pedido\n  14. observacao - text - Observações gerais\n  15. financeiro - jsonb - Dados financeiros\n  em formato JSON\n  16. criado_em - timestamp with time zone -\n  Data/hora de criação (padrão:\n  CURRENT_TIMESTAMP)\n  17. atualizado_em - timestamp with time\n  zone - Data/hora da última atualização\n  (padrão: CURRENT_TIMESTAMP)\n  18. status - varchar(10) - Status do\n  carrinho (padrão: 'aberto', aceita apenas\n  'aberto' ou 'fechado')\n",
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "carrinho",
+          "mode": "list",
+          "cachedResultName": "carrinho"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "atualizado_em": "={{ $now }}",
+            "prazoentrega": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('prazoentrega', `Prazo de entrega em dias úteis. Atualize quando o cliente escolher o frete ou entao quando for retirada colocar por padrão 1 dia útil`, 'number') }}",
+            "vrprodutos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrprodutos', `valor total produtos - use a calculadora`, 'number') }}",
+            "vrfrete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrfrete', `valor total frete  - use a calculadora`, 'number') }}",
+            "vrtotal": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrtotal', `valor total produtos + frete  - use a calculadora`, 'number') }}",
+            "pagarme_link_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pagarme_link_id', `Sempre que gerar um link da pagarme, grave-o aqui o seu id. ATENÇÃO: Enquanto não gerar nenhum link, não mexa nesse campo`, 'string') }}",
+            "produtos": "={{ JSON.parse($fromAI('produtos', `Esse campo é um array de objetos — lista de produtos no carrinho. Cada item deve conter:\n    - codigo (string) — código do produto\n    - quantidade (integer) — quantidade do produto\n    - preco (numeric) — preço unitário\n    - valor (numeric) — valor total (use a calculadora)\n`, 'json')) }}",
+            "endereco": "={{ JSON.parse($fromAI('endereco', `  - endereco (objeto, obrigatório se\n  entrega, opcional se retirada) — dados do\n   endereço de entrega:\n    - tipolog (string) — tipo de logradouro\n   (Rua, Av, etc)\n    - logradouro (string) — nome da\n  rua/avenida\n    - numero (string) — número\n    - complemento (string, opcional) —\n  complemento\n    - bairro (string) — bairro\n    - cidade (string) — cidade\n    - estado (string, 2 chars) — UF\n    - cep (string, 8 chars) — CEP sem\n  formatação\n    - codibge (string) — código IBGE do\n  município\n    - codpais (string) — código do país\n  (ex: \"BRA\")\n\nSe não tiver o endereço ainda mande um objeto vazio.\n`, 'json')) }}",
+            "data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('data', `Data do pedido nesse formato 20251001 por exemplo para 01 de outubro de 2025`, 'string') }}",
+            "hora": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('hora', `Hora do pedido nesse formato 143500 por exemplo para 14:35:00 horário de brasília`, 'string') }}",
+            "codlojaretira": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('codlojaretira', `Caso seja retirada , definir sendo 1 para caso o cliente opte para retirada na Loja Santo Andŕé e 3 para o caso dele escolher retirar na loja Mauá`, 'string') }}",
+            "codtransp": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('codtransp', ``, 'string') }}",
+            "observacao": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('observacao', `Caso o cliente peça embalagem para presente ou qualquer outro tipo de observação pertinente`, 'string') }}",
+            "financeiro": "={{ JSON.parse($fromAI('financeiro', `Em codigoForma, caso o cliente opte por Pix , insira PIX. Em caso de cartão, insira CT\nEm valor, o valor total do pedido\nÉ para mandar nesse campo um array sem estar em formato de string. Se não tiver nada para colocar mande um objeto vazio\n ATENÇÃO: Enquanto não gerar nenhum link, não mexa nesse campo`, 'json')) }}",
+            "status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('status', `opções disponíveis: \"aberto\" ou \"fechado\"\n\n  - Se não informar o status, o padrão será\n   \"aberto\".\n  - Use \"fechado\" quando o pedido for\n  finalizado/pago.\n`, 'string') }}",
+            "pedidoecom": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pedidoecom__using_to_match_', `Id DO Carrinho - caso o cliente tenha um carrinho aberto usar o que esta salvo em seu campo carrinho_id  `, 'string') }}",
+            "lead_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('lead_id', `ID DO LEAD `, 'number') }}"
+          },
+          "matchingColumns": [
+            "pedidoecom"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "pagarme_link_id",
+              "displayName": "pagarme_link_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "endereco",
+              "displayName": "endereco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "pedidoecom",
+              "displayName": "pedidoecom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prazoentrega",
+              "displayName": "prazoentrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "codlojaretira",
+              "displayName": "codlojaretira",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "codtransp",
+              "displayName": "codtransp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "vrprodutos",
+              "displayName": "vrprodutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "vrfrete",
+              "displayName": "vrfrete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "vrtotal",
+              "displayName": "vrtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "observacao",
+              "displayName": "observacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "financeiro",
+              "displayName": "financeiro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -544,
+        1120
+      ],
+      "id": "e01f3922-9ab8-4b81-ad30-df778b732beb",
+      "name": "atualiza_carrinho1",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Quando usar?\n\nSempre que precisar atualizar o campo produtos do carrinho, em caso de:\n-> Adicionar novo item\n-> Editar um item existente (como por exemplo alterar a quantidade)\n-> Excluir um item",
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "carrinho",
+          "mode": "list",
+          "cachedResultName": "carrinho"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "produtos": "={{ $fromAI('produtos', `Esse campo produtos tem a lista de produtos no carrinho. Cada item deve conter:\n    - codigo (string) — código do produto\n    - quantidade (integer) — quantidade do produto\n    - preco (numeric) — preço unitário\n    - valor (numeric) — valor total (use a calculadora)\n`, 'string') }}",
+            "pedidoecom": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('pedidoecom__using_to_match_', `Id DO Carrinho - caso o cliente tenha um carrinho aberto usar o que esta salvo em seu campo carrinho_id  `, 'string') }}",
+            "vrtotal": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrtotal', `Valor total dos produtos + frete após a edição - usar calculadora`, 'number') }}",
+            "vrprodutos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('vrprodutos', `Valor total dos produtos após a edição - usar calculadora`, 'number') }}"
+          },
+          "matchingColumns": [
+            "pedidoecom"
+          ],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pagarme_link_id",
+              "displayName": "pagarme_link_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endereco",
+              "displayName": "endereco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "pedidoecom",
+              "displayName": "pedidoecom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prazoentrega",
+              "displayName": "prazoentrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "codlojaretira",
+              "displayName": "codlojaretira",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "codtransp",
+              "displayName": "codtransp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrprodutos",
+              "displayName": "vrprodutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "vrfrete",
+              "displayName": "vrfrete",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "vrtotal",
+              "displayName": "vrtotal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "observacao",
+              "displayName": "observacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "financeiro",
+              "displayName": "financeiro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "criado_em",
+              "displayName": "criado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "atualizado_em",
+              "displayName": "atualizado_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -496,
+        848
+      ],
+      "id": "5ad946f1-0873-437b-a6c9-c9dca35b2f70",
+      "name": "atualiza_produtos_carrinho",
+      "credentials": {
+        "postgres": {
+          "id": "p9f3IxfcUBLYtUqM",
+          "name": "Postgres Cubo"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "calculadora": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcula_frete": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_lead_id": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "atualiza_lead": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cria_carrinho": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "busca_carrinho_id": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "adiciona_item": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "remove_item": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "atualiza_quantidade": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "ve_carrinho": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "consulta_status_pedido1": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "link_pagamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtem_vtex_id": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcula_quantidade_caixas_de_piso": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consulta_produto": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consulta_preco": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verifica_se_imagem_existe": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extrai_conteudo_pagina": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtem_endereco_pelo_cep": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "subir_pedido_erp": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cancelar_link_pagamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualiza_endereco_carrinho": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "atualiza_lojaretirada_carrinho": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualiza_frete_carrinho": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualiza_financeiro_carrinho": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualiza_produtos_carrinho": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timezone": "America/Sao_Paulo"
+  },
+  "versionId": "db79043a-0634-4a53-afbc-0c6c493880ed",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "02b33dc78f42c2f4686f16a0883b0b4ceb2bdd6d3cef18808f9b2fcdef9b4d05"
+  },
+  "id": "DHn8Xpyg6YULxaxe",
+  "tags": [
+    {
+      "createdAt": "2025-09-21T00:40:41.499Z",
+      "updatedAt": "2025-09-21T00:40:41.499Z",
+      "id": "5tfJoaLbZBQ9m5wk",
+      "name": "MCP Server"
+    }
+  ]
+}

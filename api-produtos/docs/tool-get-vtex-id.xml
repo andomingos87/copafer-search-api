@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tool_definition>
+  <metadata>
+    <name>obtem_vtex_id</name>
+    <version>1.0</version>
+    <author>Copafer Agent</author>
+  </metadata>
+
+  <function>
+    <name>obtem_vtex_id</name>
+    
+    <description>
+      Converte o código interno do produto (RefId/SKU) no identificador VTEX (ProductId) necessário para operações subsequentes como cálculo de frete, consulta de estoque e simulação de carrinho.
+      
+      Use esta ferramenta quando:
+      - O usuário fornecer um código de produto (RefId) e você precisar do ProductId VTEX
+      - Antes de chamar endpoints que exigem o ProductId (ex: simulação de frete)
+      - Para validar se um código de produto existe no catálogo VTEX
+      
+      Não use esta ferramenta quando:
+      - Já possuir o ProductId VTEX
+      - O usuário solicitar informações que não dependem do ProductId
+    </description>
+
+    <endpoint>
+      <method>GET</method>
+      <url>https://search-products-api.fly.dev/vtex/sku/{ref_id}/productId</url>
+      <base_url>https://search-products-api.fly.dev</base_url>
+      <path>/vtex/sku/{ref_id}/productId</path>
+    </endpoint>
+
+    <parameters>
+      <parameter>
+        <name>ref_id</name>
+        <type>string</type>
+        <location>path</location>
+        <required>true</required>
+        <description>
+          Código interno do produto (RefId/SKU) usado no sistema Copafer.
+          Geralmente é um código numérico como "33375".
+          Este é o código que o cliente ou vendedor usa para identificar produtos.
+        </description>
+        <examples>
+          <example>33375</example>
+          <example>12345</example>
+        </examples>
+      </parameter>
+    </parameters>
+
+    <response>
+      <success>
+        <http_status>200</http_status>
+        <content_type>application/json</content_type>
+        <schema>
+          <field>
+            <name>sku</name>
+            <type>string</type>
+            <description>O RefId enviado na requisição (eco do parâmetro)</description>
+          </field>
+          <field>
+            <name>found</name>
+            <type>boolean</type>
+            <description>Indica se o produto foi encontrado no catálogo VTEX</description>
+          </field>
+          <field>
+            <name>productId</name>
+            <type>integer</type>
+            <nullable>true</nullable>
+            <description>
+              O identificador único do produto na plataforma VTEX.
+              Presente apenas quando found=true.
+              Este é o valor que deve ser usado em operações subsequentes (vtex_id).
+            </description>
+          </field>
+        </schema>
+        
+        <example_found>
+          <description>Produto encontrado com sucesso</description>
+          <request>GET /vtex/sku/33375/productId</request>
+          <response_body>
+{
+  "sku": "33375",
+  "found": true,
+  "productId": 12345
+}
+          </response_body>
+          <output_format>vtex_id: 12345</output_format>
+        </example_found>
+
+        <example_not_found>
+          <description>Produto não encontrado no catálogo</description>
+          <request>GET /vtex/sku/99999/productId</request>
+          <response_body>
+{
+  "sku": "99999",
+  "found": false
+}
+          </response_body>
+          <output_format>Produto com RefId 99999 não encontrado no catálogo VTEX</output_format>
+        </example_not_found>
+      </success>
+
+      <errors>
+        <error>
+          <http_status>500</http_status>
+          <description>Erro interno do servidor ou falha na comunicação com a API VTEX</description>
+        </error>
+        <error>
+          <http_status>503</http_status>
+          <description>Serviço temporariamente indisponível</description>
+        </error>
+      </errors>
+    </response>
+
+    <output_instructions>
+      <instruction priority="1">
+        Quando found=true, extraia o campo "productId" e retorne como "vtex_id"
+      </instruction>
+      <instruction priority="2">
+        Formato de saída esperado: vtex_id: {valor_do_productId}
+      </instruction>
+      <instruction priority="3">
+        Quando found=false, informe ao usuário que o produto não foi encontrado
+      </instruction>
+      <instruction priority="4">
+        O vtex_id retornado deve ser armazenado para uso em operações subsequentes
+      </instruction>
+    </output_instructions>
+
+    <usage_examples>
+      <example>
+        <scenario>Usuário quer calcular frete de um produto</scenario>
+        <user_input>Qual o frete do produto 33375 para o CEP 01310-100?</user_input>
+        <tool_sequence>
+          <step order="1">Chamar get_vtex_product_id com ref_id="33375"</step>
+          <step order="2">Obter vtex_id da resposta (ex: 12345)</step>
+          <step order="3">Usar vtex_id para chamar endpoint de simulação de frete</step>
+        </tool_sequence>
+      </example>
+      
+      <example>
+        <scenario>Validar existência de produto</scenario>
+        <user_input>O produto ABC123 existe no catálogo?</user_input>
+        <tool_sequence>
+          <step order="1">Chamar get_vtex_product_id com ref_id="ABC123"</step>
+          <step order="2">Verificar campo "found" na resposta</step>
+          <step order="3">Informar usuário se produto existe ou não</step>
+        </tool_sequence>
+      </example>
+    </usage_examples>
+
+    <curl_example>
+      <description>Exemplo de requisição usando cURL</description>
+      <command>curl -X GET "https://search-products-api.fly.dev/vtex/sku/33375/productId"</command>
+    </curl_example>
+
+    <related_tools>
+      <tool>
+        <name>simulate_shipping</name>
+        <description>Usa o vtex_id para calcular opções de frete</description>
+        <dependency>Requer vtex_id obtido desta ferramenta</dependency>
+      </tool>
+    </related_tools>
+  </function>
+</tool_definition>
+
