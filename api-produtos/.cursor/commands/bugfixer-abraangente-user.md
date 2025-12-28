@@ -1,0 +1,1 @@
+Por mais que o teste foi feito com um usuário especifico eu preciso de uma solução abraangente independente do usuário.

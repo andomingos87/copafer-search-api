@@ -8,3 +8,7 @@ tiktoken
 requests
 pandas
 tqdm
+redis
+pytest
+pytest-mock
+pydantic

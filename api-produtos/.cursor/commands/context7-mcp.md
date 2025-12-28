@@ -1,0 +1,1 @@
+Use o MCP do Context7 para documentações atualizadas e boas práticas de desenvolvimento

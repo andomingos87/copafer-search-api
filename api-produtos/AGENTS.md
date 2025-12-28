@@ -29,6 +29,10 @@
 - `docs/` — explain what lives here and when agents should edit it.
 
 ## AI Context References
-- Documentation index: `.context/docs/README.md`
+- Documentation index: `.context/docs/README.md` (ou `docs/README.md`)
 - Agent playbooks: `.context/agents/README.md`
+- Implementation plans: `.context/plans/`
 - Contributor guide: `CONTRIBUTING.md`
+
+## Planos de Implementação
+- `image-checker-implementation.md` - Implementação do verificador de imagem (substituição do N8N)

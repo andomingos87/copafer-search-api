@@ -1,1 +1,0 @@
-Apenas compreenda o que eu disse, não execute/altere nada no repositorio.

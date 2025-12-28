@@ -31,6 +31,7 @@ Este projeto é uma **API de busca de produtos** construída com FastAPI. Ela pe
 | [paint_estimator.py](./paint_estimator.md) | Cálculo de quantidade de tinta e latas |
 | [vtex_shipping.py](./vtex_shipping.md) | Integração com VTEX para frete |
 | [vtex_client.py](./vtex_client.md) | Cliente simples para consulta VTEX |
+| [image_checker.py](./image_checker.md) | Verificação de imagem adequada com IA e cache Redis |
 
 ### 📊 Utilitários de Dados
 
@@ -68,6 +69,7 @@ Este projeto é uma **API de busca de produtos** construída com FastAPI. Ela pe
 │  POST /paint/estimate  │ Cálculo de tinta                   │
 │  GET  /vtex/sku/{sku}  │ Consulta SKU na VTEX               │
 │  POST /shipping/*      │ Simulação de frete                 │
+│  POST /is-image-exists │ Verifica imagem adequada do produto│
 └────────────┬──────────────────────────────┬─────────────────┘
              │                              │
     ┌────────▼────────┐          ┌─────────▼─────────┐
@@ -115,6 +117,20 @@ O projeto utiliza um arquivo `.env` com as seguintes variáveis:
 
 ### API Cubo
 - `X_COPAFER_KEY` - Chave de acesso à API do Cubo
+
+### Redis (Cache de Imagens)
+- `REDIS_HOST` - Host do Redis (padrão: localhost)
+- `REDIS_PORT` - Porta (padrão: 6379)
+- `REDIS_PASSWORD` - Senha (opcional)
+- `REDIS_DB` - Número do banco (padrão: 0)
+
+### OpenRouter (IA para Seleção de Imagem)
+- `OPENROUTER_API_KEY` - Bearer token para OpenRouter
+- `OPENROUTER_MODEL` - Modelo a usar (padrão: openai/gpt-5-chat)
+
+### API Copafer (Busca de Imagens)
+- `COPAFER_API_BASE_URL` - URL base da API
+- `COPAFER_AUTH_TOKEN` - Token de autenticação
 
 ---
 
