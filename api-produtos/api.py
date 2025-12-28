@@ -5,6 +5,7 @@ from search_products import search_products  # importa sua função já pronta
 from typing import List, Optional, Dict, Any
 import os
 import requests
+import math
 from dotenv import load_dotenv
 from pathlib import Path
 from paint_estimator import estimate_paint as estimate_paint_logic
@@ -61,6 +62,40 @@ def estimate_paint(req: PaintEstimateRequest):
         exclude_area_m2=req.exclude_area_m2,
         can_sizes_liters=req.can_sizes_liters,
     )
+
+class FlooringEstimateRequest(BaseModel):
+    """Schema de entrada para o cálculo de pisos.
+
+    - area: área total em m² a ser coberta.
+    - qtde_cx: quantidade de m² que uma caixa de piso cobre.
+    """
+    area: float  # área total a ser coberta em m²
+    qtde_cx: float  # quantidade de m² que uma caixa cobre
+
+@app.post("/flooring/estimate")
+def estimate_flooring(req: FlooringEstimateRequest):
+    """Endpoint para calcular quantas caixas de piso são necessárias para cobrir uma área.
+
+    Lógica:
+      1. Divide a área total pela cobertura de uma caixa.
+      2. Arredonda para cima (ceil) pois não é possível comprar fração de caixa.
+
+    Retorna um JSON com a quantidade de caixas necessárias.
+    """
+    if req.qtde_cx <= 0:
+        return {"error": "qtde_cx deve ser maior que zero"}
+    
+    boxes_needed = math.ceil(req.area / req.qtde_cx)
+    coverage_total = boxes_needed * req.qtde_cx
+    waste = max(coverage_total - req.area, 0.0)
+    
+    return {
+        "area": req.area,
+        "qtde_cx": req.qtde_cx,
+        "boxes_needed": boxes_needed,
+        "coverage_total": round(coverage_total, 2),
+        "waste_m2": round(waste, 2),
+    }
 
 """
 Integração VTEX desacoplada em `vtex_shipping.py`.

@@ -156,6 +156,11 @@
                         <p>Calcula quantidade de latas necessárias para pintura</p>
                     </div>
                     <div class="feature-card">
+                        <span class="feature-icon">🏠</span>
+                        <h3>Estimador de Piso</h3>
+                        <p>Calcula quantidade de caixas necessárias para revestimento</p>
+                    </div>
+                    <div class="feature-card">
                         <span class="feature-icon">🚚</span>
                         <h3>Integração VTEX</h3>
                         <p>Simulação de frete e consulta de SKUs</p>
@@ -176,6 +181,7 @@
 ├─────────────────────────────────────────────────────────────┤
 │  POST /search          │ Busca híbrida de produtos          │
 │  POST /paint/estimate  │ Cálculo de tinta                   │
+│  POST /flooring/estimate │ Cálculo de piso                  │
 │  GET  /vtex/sku/{sku}  │ Consulta SKU na VTEX               │
 │  POST /shipping/*      │ Simulação de frete                 │
 └────────────┬──────────────────────────────┬─────────────────┘
@@ -557,6 +563,140 @@ https://search-products-api.fly.dev</code></pre>
     "coverage_m2_per_liter": 10,
     "coats": 2,
     "exclude_area_m2": 5
+  }'</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POST /flooring/estimate -->
+                <div class="card" id="endpoint-flooring">
+                    <div class="endpoint-header">
+                        <span class="method post">POST</span>
+                        <code>/flooring/estimate</code>
+                    </div>
+                    <h2>Estimador de Piso</h2>
+                    <p>Calcula quantas caixas de piso são necessárias para cobrir uma área determinada.</p>
+                    
+                    <div class="endpoint-details">
+                        <h4>📥 Request Body</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Obrigatório</th>
+                                    <th>Padrão</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>area</code></td>
+                                    <td>float</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>Área total a ser coberta em m²</td>
+                                </tr>
+                                <tr>
+                                    <td><code>qtde_cx</code></td>
+                                    <td>float</td>
+                                    <td><span class="badge required">✓</span></td>
+                                    <td>-</td>
+                                    <td>Quantidade de m² que uma caixa de piso cobre</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="endpoint-io">
+                            <div class="io-block">
+                                <h5>Exemplo de Request</h5>
+                                <pre><code>{
+  "area": 50.0,
+  "qtde_cx": 2.5
+}</code></pre>
+                            </div>
+                            <div class="io-block">
+                                <h5>Exemplo de Response</h5>
+                                <pre><code>{
+  "area": 50.0,
+  "qtde_cx": 2.5,
+  "boxes_needed": 20,
+  "coverage_total": 50.0,
+  "waste_m2": 0.0
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <h4>📤 Response Fields</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>area</code></td>
+                                    <td>float</td>
+                                    <td>Área total informada (m²)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>qtde_cx</code></td>
+                                    <td>float</td>
+                                    <td>Cobertura de uma caixa (m²)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>boxes_needed</code></td>
+                                    <td>int</td>
+                                    <td>Quantidade de caixas necessárias (arredondado para cima)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>coverage_total</code></td>
+                                    <td>float</td>
+                                    <td>Cobertura total das caixas calculadas (m²)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>waste_m2</code></td>
+                                    <td>float</td>
+                                    <td>Área de sobra/desperdício (m²)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="curl-tabs">
+                        <div class="curl-tab-buttons">
+                            <button class="curl-tab-btn active" onclick="switchCurlTab(this, 'local')">🖥️ Local</button>
+                            <button class="curl-tab-btn" onclick="switchCurlTab(this, 'prod')">🚀 Produção</button>
+                        </div>
+                        <div class="curl-tab-content active" data-env="local">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "http://localhost:8000/flooring/estimate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "area": 50.0,
+    "qtde_cx": 2.5
+  }'</code></pre>
+                            </div>
+                        </div>
+                        <div class="curl-tab-content" data-env="prod">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">curl</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code>curl -X POST "https://search-products-api.fly.dev/flooring/estimate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "area": 50.0,
+    "qtde_cx": 2.5
   }'</code></pre>
                             </div>
                         </div>
@@ -951,6 +1091,11 @@ https://search-products-api.fly.dev</code></pre>
                                 <td><span class="method post small">POST</span></td>
                                 <td><code>/paint/estimate</code></td>
                                 <td>Cálculo de quantidade de tinta</td>
+                            </tr>
+                            <tr>
+                                <td><span class="method post small">POST</span></td>
+                                <td><code>/flooring/estimate</code></td>
+                                <td>Cálculo de quantidade de caixas de piso</td>
                             </tr>
                             <tr>
                                 <td><span class="method get small">GET</span></td>
