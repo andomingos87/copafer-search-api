@@ -1,7 +1,17 @@
 """Fixtures comuns para testes do image_checker."""
+import logging
 import pytest
 from unittest.mock import Mock, MagicMock
 from typing import Dict, Any, List
+
+# Configura logging para testes de integração
+# Mostra logs de WARNING e acima por padrão
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Para ver logs DEBUG durante testes, use: pytest -v -s --log-cli-level=DEBUG
 
 
 @pytest.fixture

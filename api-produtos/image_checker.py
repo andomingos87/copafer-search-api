@@ -1,12 +1,16 @@
 import os
 import json
 import re
+import logging
 from typing import Optional, List, Dict, Any
 import requests
 import redis
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from pathlib import Path
+
+# Configuração de logging
+logger = logging.getLogger(__name__)
 
 # Carrega variáveis de ambiente
 _ENV_PATH = Path(__file__).parent / ".env"
@@ -17,6 +21,7 @@ REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 REDIS_DB = int(os.getenv("REDIS_DB", "0"))
+REDIS_SSL = os.getenv("REDIS_SSL", "false").lower() == "true"  # Para Upstash e outros com TLS
 
 # Config API Copafer
 COPAFER_API_BASE_URL = os.getenv("COPAFER_API_BASE_URL", "").strip()
@@ -61,6 +66,9 @@ def get_redis_client() -> Optional[redis.Redis]:
         Cliente Redis se conexão for bem-sucedida, None caso contrário.
     """
     try:
+        logger.debug(
+            f"Tentando conectar ao Redis: host={REDIS_HOST}, port={REDIS_PORT}, db={REDIS_DB}, ssl={REDIS_SSL}"
+        )
         client = redis.Redis(
             host=REDIS_HOST,
             port=REDIS_PORT,
@@ -69,11 +77,32 @@ def get_redis_client() -> Optional[redis.Redis]:
             decode_responses=True,
             socket_connect_timeout=5,
             socket_timeout=5,
+            ssl=REDIS_SSL,
+            ssl_cert_reqs="required" if REDIS_SSL else None,
         )
         # Testa conexão
         client.ping()
+        logger.debug("Conexão com Redis estabelecida com sucesso")
         return client
-    except Exception:
+    except redis.ConnectionError as e:
+        logger.warning(
+            f"Erro de conexão com Redis (ConnectionError): {type(e).__name__}: {str(e)}"
+        )
+        return None
+    except redis.AuthenticationError as e:
+        logger.warning(
+            f"Erro de autenticação com Redis (AuthenticationError): {type(e).__name__}: {str(e)}"
+        )
+        return None
+    except redis.TimeoutError as e:
+        logger.warning(
+            f"Timeout ao conectar com Redis (TimeoutError): {type(e).__name__}: {str(e)}"
+        )
+        return None
+    except Exception as e:
+        logger.warning(
+            f"Erro inesperado ao conectar com Redis: {type(e).__name__}: {str(e)}"
+        )
         return None
 
 
@@ -90,13 +119,19 @@ def get_cached_image(produto_id: str) -> Optional[str]:
     """
     r = get_redis_client()
     if r is None:
+        logger.debug(f"Redis indisponível, não é possível buscar cache para produto {produto_id}")
         return None
     
     try:
         key = f"best_image_for_{produto_id}"
         value = r.get(key)
+        if value is not None:
+            logger.debug(f"Cache hit para produto {produto_id}")
+        else:
+            logger.debug(f"Cache miss para produto {produto_id}")
         return value
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Erro ao buscar cache do Redis para produto {produto_id}: {type(e).__name__}: {str(e)}")
         return None
 
 
@@ -113,14 +148,17 @@ def set_cached_image(produto_id: str, base64_value: Optional[str], ttl: int = IM
     """
     r = get_redis_client()
     if r is None:
+        logger.debug(f"Redis indisponível, não é possível salvar cache para produto {produto_id}")
         return False
     
     try:
         key = f"best_image_for_{produto_id}"
         value = base64_value if base64_value is not None else "null"
         r.setex(key, ttl, value)
+        logger.debug(f"Cache salvo para produto {produto_id} com TTL de {ttl} segundos")
         return True
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Erro ao salvar cache no Redis para produto {produto_id}: {type(e).__name__}: {str(e)}")
         return False
 
 

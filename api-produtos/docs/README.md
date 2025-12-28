@@ -148,6 +148,39 @@ cp .env.example .env
 uvicorn api:app --host 0.0.0.0 --port 8000
 ```
 
+## Exemplos de Uso
+
+### Verificar Imagem de Produto
+
+Verifica se um produto possui uma imagem adequada para exibição ao cliente, utilizando cache Redis e IA (OpenRouter/GPT-5) para seleção da melhor imagem.
+
+```bash
+# Request
+curl -X POST "http://localhost:8000/is-image-exists" \
+  -H "Content-Type: application/json" \
+  -d '{"produto_id": "45250"}'
+
+# Response (com imagem adequada)
+{
+  "imageExists": true,
+  "IdProduto": "45250"
+}
+
+# Response (sem imagem adequada)
+{
+  "imageExists": false,
+  "IdProduto": "45250"
+}
+```
+
+**Detalhes:**
+- Utiliza cache Redis para otimização (TTL: 3 dias)
+- Busca imagens na API Copafer se não houver cache
+- Analisa imagens com IA para selecionar a melhor
+- Compatível com workflow N8N original (`se_img_existe`)
+
+Para mais informações, consulte [image_checker.md](./image_checker.md).
+
 ---
 
 ## Fluxo de Dados

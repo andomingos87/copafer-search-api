@@ -11,6 +11,7 @@ Este repositório contém utilitários e uma API (FastAPI) voltados à busca de 
     - `GET /vtex/sku/{sku}/productId`: obtém `productId` na VTEX a partir do SKU/RefId.
     - `POST /shipping/simulate`: simula frete na VTEX para uma lista de SKUs.
     - `POST /shipping/simulate/slas`: retorna somente `{id, price}` de SLAs da simulação.
+    - `POST /is-image-exists`: verifica se produto possui imagem adequada (consome `image_checker.py`).
   - Lê variáveis do `.env` local (em `api/.env`).
   - Executável com `uvicorn`.
 
@@ -68,6 +69,12 @@ Este repositório contém utilitários e uma API (FastAPI) voltados à busca de 
   - Retorna total do arquivo, total de registros de dados e número de linhas de cabeçalho.
   - Útil para validar integridade do CSV antes da ingestão.
 
+- `image_checker.py`
+  - Verificação de imagem adequada para produtos utilizando cache Redis e IA (OpenRouter/GPT-5).
+  - Função principal: `check_image_exists(produto_id)` que verifica se existe imagem adequada.
+  - Utilizado por `api.py` no endpoint `/is-image-exists`.
+  - Substitui workflow N8N `se_img_existe`.
+
 ## Observações
 
 - Variáveis de ambiente são lidas do `.env` localizado neste diretório (`api/.env`). Exemplos relevantes:
@@ -75,5 +82,26 @@ Este repositório contém utilitários e uma API (FastAPI) voltados à busca de 
   - OpenAI: `OPENAI_API_KEY`, `EMB_MODEL`, `EMB_DIM`.
   - VTEX: `VTEX_APP_KEY`, `VTEX_APP_TOKEN`, `VTEX_ACCOUNT_HOST`.
   - Cubo: `X_COPAFER_KEY`.
+  - Redis (cache de imagens): `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB`, `REDIS_SSL`.
+  - OpenRouter (IA): `OPENROUTER_API_KEY`, `OPENROUTER_API_URL`, `OPENROUTER_MODEL`.
+  - API Copafer (imagens): `COPAFER_API_BASE_URL`, `COPAFER_AUTH_HEADER`, `COPAFER_AUTH_TOKEN`.
+  - Cache: `IMAGE_CACHE_TTL` (padrão: 259200 segundos = 3 dias).
 - Requisitos de Python estão em `requirements.txt`.
 - A API pode ser iniciada com: `uvicorn api:app --host 0.0.0.0 --port 8000` (na pasta `api/`).
+
+## Exemplo de Uso: Verificação de Imagem
+
+```bash
+# Verificar se produto possui imagem adequada
+curl -X POST "http://localhost:8000/is-image-exists" \
+  -H "Content-Type: application/json" \
+  -d '{"produto_id": "45250"}'
+
+# Response
+{
+  "imageExists": true,
+  "IdProduto": "45250"
+}
+```
+
+Para mais detalhes, consulte `docs/image_checker.md`.

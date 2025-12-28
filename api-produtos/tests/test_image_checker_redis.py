@@ -10,6 +10,7 @@ from image_checker import (
     REDIS_PORT,
     REDIS_PASSWORD,
     REDIS_DB,
+    REDIS_SSL,
     IMAGE_CACHE_TTL,
 )
 
@@ -37,6 +38,8 @@ class TestGetRedisClient:
             decode_responses=True,
             socket_connect_timeout=5,
             socket_timeout=5,
+            ssl=REDIS_SSL,
+            ssl_cert_reqs="required" if REDIS_SSL else None,
         )
         mock_client.ping.assert_called_once()
 

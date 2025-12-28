@@ -16,6 +16,11 @@ from vtex_shipping import (
     simulate_shipping_for_skus,
     extract_slas_id_price,
 )
+from image_checker import (
+    ImageCheckRequest,
+    ImageCheckResponse,
+    check_image_exists,
+)
 
 app = FastAPI()
 # Carrega .env do diretório deste arquivo (api/.env)
@@ -137,6 +142,33 @@ def shipping_simulate_slas(req: ShippingSimulateRequest):
 
     slas_flat = extract_slas_id_price(res.get("logisticsInfo", []))
     return slas_flat
+
+
+@app.post("/is-image-exists", response_model=ImageCheckResponse)
+def is_image_exists(req: ImageCheckRequest):
+    """Endpoint para verificar se existe uma imagem adequada para um produto.
+    
+    Este endpoint substitui o workflow N8N `se_img_existe` e realiza:
+    1. Verificação de cache Redis (otimização)
+    2. Busca de imagens na API Copafer se não houver cache
+    3. Análise com IA (OpenRouter/GPT-5) para selecionar a melhor imagem
+    4. Armazenamento do resultado no cache Redis (TTL: 3 dias)
+    
+    O endpoint retorna se existe uma imagem adequada para exibição ao cliente,
+    seguindo o mesmo formato de resposta do workflow N8N original.
+    
+    Args:
+        req: Request contendo o ID do produto
+        
+    Returns:
+        ImageCheckResponse com imageExists (bool) e IdProduto (str)
+    """
+    result = check_image_exists(req.produto_id)
+    return ImageCheckResponse(
+        imageExists=result["imageExists"],
+        IdProduto=result["IdProduto"]
+    )
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

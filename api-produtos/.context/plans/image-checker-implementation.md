@@ -174,10 +174,10 @@ Implementar a funcionalidade de verificação de imagem de produto em Python, su
 ### Fase 3: Integração com API
 
 #### 3.1 Adicionar Endpoint no `api.py`
-- [ ] Importar `ImageCheckRequest`, `ImageCheckResponse`, `check_image_exists`
-- [ ] Adicionar endpoint `POST /is-image-exists`
-- [ ] Adicionar docstring do endpoint
-- [ ] Configurar response_model
+- [x] Importar `ImageCheckRequest`, `ImageCheckResponse`, `check_image_exists`
+- [x] Adicionar endpoint `POST /is-image-exists`
+- [x] Adicionar docstring do endpoint
+- [x] Configurar response_model
 
 **Artefatos**:
 - Endpoint adicionado em `api.py`
@@ -196,13 +196,16 @@ Implementar a funcionalidade de verificação de imagem de produto em Python, su
 ### Fase 4: Testes e Validação
 
 #### 4.1 Testes Unitários
-- [ ] Testar funções Redis isoladamente
-- [ ] Testar busca de imagens (mock da API)
-- [ ] Testar integração OpenRouter (mock da API)
-- [ ] Testar função principal com diferentes cenários
+- [x] Testar funções Redis isoladamente
+- [x] Testar busca de imagens (mock da API)
+- [x] Testar integração OpenRouter (mock da API)
+- [x] Testar função principal com diferentes cenários
 
 **Artefatos**:
-- Testes unitários criados (opcional, se projeto usar testes)
+- Testes unitários criados em `tests/test_image_checker_redis.py`
+- Testes unitários criados em `tests/test_image_checker_copafer.py`
+- Testes unitários criados em `tests/test_image_checker_openrouter.py`
+- Testes unitários criados em `tests/test_image_checker_flow.py`
 
 **Referências**:
 - `docs/image_checker.md` - Seção "Testes"
@@ -210,14 +213,16 @@ Implementar a funcionalidade de verificação de imagem de produto em Python, su
 ---
 
 #### 4.2 Testes de Integração
-- [ ] Testar fluxo completo com Redis disponível
-- [ ] Testar fluxo completo com Redis indisponível
-- [ ] Testar com diferentes produtos (com/sem imagens)
-- [ ] Validar formato de resposta
-- [ ] Validar cache (TTL, chaves)
+- [x] Testar fluxo completo com Redis disponível
+- [x] Testar fluxo completo com Redis indisponível
+- [x] Testar com diferentes produtos (com/sem imagens)
+- [x] Validar formato de resposta
+- [x] Validar cache (TTL, chaves)
 
 **Artefatos**:
-- Testes de integração executados
+- Testes de integração criados em `tests/test_image_checker_integration.py`
+- Testes podem ser executados com `pytest -m integration`
+- Testes podem ser pulados com variáveis de ambiente (SKIP_REDIS_TESTS, SKIP_COPAFER_TESTS, SKIP_OPENROUTER_TESTS)
 
 **Referências**:
 - `docs/image_checker.md` - Seção "Testes"
@@ -225,13 +230,18 @@ Implementar a funcionalidade de verificação de imagem de produto em Python, su
 ---
 
 #### 4.3 Validação de Compatibilidade
-- [ ] Comparar request/response com workflow N8N
-- [ ] Validar chaves Redis (mesmo formato)
-- [ ] Validar TTL (3 dias)
-- [ ] Validar código especial `932042349`
+- [x] Comparar request/response com workflow N8N
+- [x] Validar chaves Redis (mesmo formato)
+- [x] Validar TTL (3 dias)
+- [x] Validar código especial `932042349`
 
 **Artefatos**:
-- Checklist de compatibilidade preenchido
+- Testes de compatibilidade criados em `tests/test_image_checker_compatibility.py`
+- Todos os cenários do workflow N8N foram validados
+- Formato de request/response é idêntico ao N8N
+- Chaves Redis seguem padrão `best_image_for_{{ produto_id }}`
+- TTL de 3 dias (259200 segundos) validado
+- Código especial 932042349 validado
 
 **Referências**:
 - `docs/se_img_existe.md` - Especificação do workflow N8N
@@ -242,13 +252,15 @@ Implementar a funcionalidade de verificação de imagem de produto em Python, su
 ### Fase 5: Documentação
 
 #### 5.1 Atualizar Documentação
-- [ ] Verificar se `docs/image_checker.md` está completo
-- [ ] Adicionar exemplos de uso
-- [ ] Documentar casos de erro
-- [ ] Adicionar troubleshooting
+- [x] Verificar se `docs/image_checker.md` está completo
+- [x] Adicionar exemplos de uso
+- [x] Documentar casos de erro
+- [x] Adicionar troubleshooting
 
 **Artefatos**:
-- Documentação atualizada
+- Documentação atualizada com exemplos completos (API, Python, JavaScript)
+- Seção de casos de erro detalhada
+- Seção de troubleshooting com soluções práticas
 
 **Referências**:
 - `docs/image_checker.md`
@@ -257,12 +269,13 @@ Implementar a funcionalidade de verificação de imagem de produto em Python, su
 ---
 
 #### 5.2 Atualizar README
-- [ ] Verificar se README já foi atualizado (já feito)
-- [ ] Adicionar exemplo de uso do endpoint
-- [ ] Adicionar variáveis de ambiente ao README
+- [x] Verificar se README já foi atualizado (já feito)
+- [x] Adicionar exemplo de uso do endpoint
+- [x] Adicionar variáveis de ambiente ao README
 
 **Artefatos**:
-- `docs/README.md` atualizado (já feito)
+- `docs/README.md` atualizado com exemplo de uso do endpoint
+- `README.md` principal atualizado com descrição do `image_checker.py` e variáveis de ambiente
 
 ---
 
