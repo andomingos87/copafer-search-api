@@ -57,6 +57,12 @@ Este projeto é uma **API de busca de produtos** construída com FastAPI. Ela pe
 |---------|-----------|
 | [requirements.txt](./requirements.md) | Dependências Python do projeto |
 
+### 🔐 Infraestrutura e Rede
+
+| Arquivo | Descrição |
+|---------|-----------|
+| [wireguard-tunnels-guide.md](./wireguard-tunnels-guide.md) | Guia completo sobre túneis VPN, WireGuard e conexão com Redis na Fly.io |
+
 ---
 
 ## Arquitetura do Sistema
