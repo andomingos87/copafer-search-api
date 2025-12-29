@@ -829,13 +829,46 @@ code {
 
 .flow-step {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.75rem 1rem;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.flow-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.flow-content {
+    flex: 1;
+}
+
+.flow-content h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.flow-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
 .flow-icon {
@@ -850,6 +883,36 @@ code {
 .flow-arrow {
     color: var(--accent-primary);
     font-size: 1.25rem;
+}
+
+.flow-list {
+    list-style: decimal;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.flow-list li {
+    margin: 0.75rem 0;
+    padding-left: 0.5rem;
+    line-height: 1.6;
+}
+
+.flow-list li strong {
+    color: var(--accent-primary);
+}
+
+.info-box {
+    padding: 1rem 1.25rem;
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid var(--accent-primary);
+    border-radius: 6px;
+    margin: 1rem 0;
+}
+
+.info-box strong {
+    color: var(--accent-primary);
+    display: block;
+    margin-bottom: 0.5rem;
 }
 
 /* ============================================
