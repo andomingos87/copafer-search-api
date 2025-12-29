@@ -24,14 +24,17 @@ REDIS_DB = int(os.getenv("REDIS_DB", "0"))
 REDIS_SSL = os.getenv("REDIS_SSL", "false").lower() == "true"  # Para Upstash e outros com TLS
 
 # Config API Copafer
-COPAFER_API_BASE_URL = os.getenv("COPAFER_API_BASE_URL", "").strip()
-COPAFER_AUTH_HEADER = os.getenv("COPAFER_AUTH_HEADER", "X-Copafer-Auth").strip()
-COPAFER_AUTH_TOKEN = os.getenv("COPAFER_AUTH_TOKEN", "").strip()
+COPAFER_API_BASE_URL = os.getenv("COPAFER_API_BASE_URL", "https://copafer.fortiddns.com/api/v2").strip()
+COPAFER_AUTH_HEADER = os.getenv("COPAFER_AUTH_HEADER", "x-copafer-key").strip()
+COPAFER_AUTH_TOKEN = os.getenv(
+    "COPAFER_AUTH_TOKEN", 
+    "uwfWJVoMFBjBpBGvkzCYnq-zZyGREXxj-dG-XDWwpWdaaLOppmTtgTdptT"
+).strip()
 
 # Config OpenRouter
-OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL", "").strip()
+OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL", "https://openrouter.ai/api/v1/chat/completions").strip()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-5-chat").strip()
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini").strip()
 
 # Cache TTL
 IMAGE_CACHE_TTL = int(os.getenv("IMAGE_CACHE_TTL", "259200"))  # 3 dias
@@ -192,7 +195,8 @@ def fetch_product_images(produto_id: str) -> Dict[str, Any]:
         data = resp.json()
         
         images = data.get("images", [])
-        if not images or not isinstance(images, list):
+        if not images:
+            logger.info(f"Produto {produto_id}: Nenhuma imagem encontrada na API")
             return {
                 "ok": False,
                 "images": [],
@@ -201,9 +205,25 @@ def fetch_product_images(produto_id: str) -> Dict[str, Any]:
         
         # Valida que cada imagem tem base64
         valid_images = []
-        for img in images:
-            if isinstance(img, dict) and img.get("base64"):
-                valid_images.append({"base64": img["base64"]})
+        for i, img in enumerate(images):
+            b64_data = img.get("base64") if isinstance(img, dict) else None
+            if b64_data:
+                # Remove quebras de linha que podem quebrar o JSON/IA
+                b64_clean = re.sub(r'\r?\n|\r', '', b64_data)
+                
+                # Garante que o prefixo data:image/... esteja presente e correto para a IA
+                if not b64_clean.startswith("data:"):
+                    b64_clean = f"data:image/jpeg;base64,{b64_clean}"
+                
+                valid_images.append({"base64": b64_clean})
+        
+        if not valid_images:
+            logger.info(f"Produto {produto_id}: Nenhuma das {len(images)} imagens encontradas é válida")
+            return {
+                "ok": False,
+                "images": [],
+                "error": "Nenhuma imagem válida encontrada (falta base64)"
+            }
         
         return {
             "ok": True,
@@ -333,6 +353,7 @@ def call_openrouter(payload: Dict[str, Any]) -> Dict[str, Any]:
         # Extrai resposta do modelo
         choices = data.get("choices", [])
         if not choices:
+            logger.error(f"OpenRouter não retornou choices: {data}")
             return {
                 "ok": False,
                 "best_image_index": None,
@@ -362,6 +383,7 @@ def call_openrouter(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "error": None
             }
         except json.JSONDecodeError as e:
+            logger.error(f"Falha ao parsear JSON da IA: {e}. Conteúdo: {message_content}")
             return {
                 "ok": False,
                 "best_image_index": None,
@@ -370,6 +392,7 @@ def call_openrouter(payload: Dict[str, Any]) -> Dict[str, Any]:
             }
             
     except requests.HTTPError as e:
+        logger.error(f"Erro HTTP no OpenRouter: {e}")
         return {
             "ok": False,
             "best_image_index": None,
@@ -377,6 +400,7 @@ def call_openrouter(payload: Dict[str, Any]) -> Dict[str, Any]:
             "error": f"Erro HTTP: {e}"
         }
     except Exception as e:
+        logger.error(f"Erro inesperado no OpenRouter: {e}")
         return {
             "ok": False,
             "best_image_index": None,
@@ -469,12 +493,9 @@ def check_image_exists(produto_id: str) -> Dict[str, Any]:
     # 6. Armazena no cache
     set_cached_image(produto_id, chosen_image_base64)
     
-    # 7. Retorna resposta (reprocessa cache para garantir consistência)
-    cached_after = get_cached_image(produto_id)
-    image_exists = cached_after is not None and cached_after != "null" and cached_after != ""
-    
+    # 7. Retorna resposta
     return {
-        "imageExists": image_exists,
+        "imageExists": True,
         "IdProduto": produto_id
     }
 
